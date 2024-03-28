@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Profile"
+            android:text="@string/profile"
             android:textSize="30sp"
             android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginTop="5dp"
-            android:text="Home" />
+            android:text="@string/home" />
 
 
     </RelativeLayout>
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="firstName"
+            android:text="@string/firstname"
             android:textSize="30dp" />
 
         <TextView
@@ -54,7 +54,7 @@
             android:layout_below="@+id/txtProfileFirstName"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="40dp"
-            android:text="lastName"
+            android:text="@string/lastname"
             android:textSize="30dp" />
 
         <TextView
@@ -64,7 +64,7 @@
             android:layout_below="@+id/txtProfileLastName"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="40dp"
-            android:text="email"
+            android:text="@string/email"
             android:textSize="30dp" />
 
         <Button
@@ -74,7 +74,7 @@
             android:layout_below="@+id/txtProfileEmail"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="40dp"
-            android:text="Logout" />
+            android:text="@string/logout" />
 
 
     </RelativeLayout>

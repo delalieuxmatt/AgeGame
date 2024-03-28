@@ -10,4 +10,8 @@
     <string name="secondname">SecondName</string>
     <string name="repeat_password">Repeat password</string>
     <string name="register">Register</string>
+    <string name="profile">Profile</string>
+    <string name="home">Home</string>
+    <string name="lastname">lastName</string>
+    <string name="logout">Logout</string>
 </resources>
