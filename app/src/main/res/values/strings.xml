@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">AgeGame</string>
+    <string name="start">Start</string>
+    <string name="don_t_have_an_account_sign_up_here">Don\'t have an account? Sign up here.</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="if_you_already_have_an_account_login_here">If you already have an account, login here!</string>
+    <string name="firstname">FirstName</string>
+    <string name="secondname">SecondName</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="register">Register</string>
 </resources>
