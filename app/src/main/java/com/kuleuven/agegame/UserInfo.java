@@ -88,6 +88,16 @@ public class UserInfo {
         return userInfo;
     }
 
+    public String getFirstName(){
+        return readFile()[0];
+    }
+    public String getLastName(){
+        return readFile()[1];
+    }
+    public String getEmail(){
+        return readFile()[2];
+    }
+
     public boolean deleteFile(){
         return file.delete();
     }

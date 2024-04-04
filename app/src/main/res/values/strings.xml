@@ -14,4 +14,6 @@
     <string name="home">Home</string>
     <string name="lastname">lastName</string>
     <string name="logout">Logout</string>
+    <string name ="Start_new_game">Start new game</string>
+    <string name="guess">Guess</string>
 </resources>
