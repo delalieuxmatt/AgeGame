@@ -26,7 +26,7 @@ public class RegistrationActivity extends AppCompatActivity {
     Button btnRegister, btnLogin;
     EditText edtTxtFirstName, edtTxtSecondName, edtTxtEmail, edtPassWord, edtPassWordAgain;
 
-    String postURL = "https://studev.groept.be/api/a23ib2a04/Registration_POST";
+    String postURL = "https://studev.groept.be/api/a23pt312/Registration_POST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     OkHttpClient client;
     EditText edtEmail, edtPassword;
     Button btnLogin2, btnSignUp;
-    String getURL = "https://studev.groept.be/api/a23ib2a04/Login";
+    String getURL = "https://studev.groept.be/api/a23pt312/Login";
     String errorMsg2 = "Login unsuccessful";
     String errorMsg3 = "Fill in all fields";
 
