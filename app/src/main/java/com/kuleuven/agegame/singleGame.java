@@ -43,9 +43,9 @@ public class singleGame extends AppCompatActivity {
     private ImageView imgPerson;
     private int roundsPlayed,roundsWon,totalDifference;
     private String imageURL;
-    private int age = 9;
-    private int guess;
+    private int age, idImage, gamesPlayed, avgDiff;
     private String imgDB = "https://studev.groept.be/api/a23pt312/img";
+    private String updateImgDB = "https://studev.groept.be/api/a23pt312/updateimg";
     private String statsDB = "https://studev.groept.be/api/a23pt312/Stats";
     private String gamesDB = "https://studev.groept.be/api/a23pt312/Games_POST";
     private String correctMsg = "Well done, you got the age correct! You have won: " ;
@@ -75,6 +75,34 @@ public class singleGame extends AppCompatActivity {
                         Toast.makeText(singleGame.this, wrongMsg + age, Toast.LENGTH_LONG).show();
                     }
                     totalDifference += abs(age-guess);
+                    //Recalculate the average score for that image
+                    int avg = (avgDiff * gamesPlayed + abs(age-guess))/(gamesPlayed+1);
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("avgdiff", String.valueOf(avg))
+                            .add("gp",String.valueOf(gamesPlayed+1))
+                            .add("id", String.valueOf(idImage))
+                            .build();
+                    Request request = new Request.Builder()
+                            .url(updateImgDB)
+                            .post(requestBody)
+                            .build();
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            e.printStackTrace();
+                            System.out.println(updateImgDB);
+                        }
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            if(!response.isSuccessful()){
+                                System.out.println("Unsuccessful");
+                            }
+                            else {
+                                System.out.println(request);
+                            }
+                        }
+                    });
 
                 }
                 else {
@@ -98,10 +126,6 @@ public class singleGame extends AppCompatActivity {
                         .add("diff", String.valueOf(totalDifference))
                         .add("email", email)
                         .build();
-                System.out.println(String.valueOf(roundsWon));
-                System.out.println(String.valueOf(roundsPlayed));
-                System.out.println(String.valueOf(totalDifference));
-                System.out.println(email);
                 Request request = new Request.Builder()
                         .url(gamesDB)
                         .post(requestBody)
@@ -157,7 +181,10 @@ public class singleGame extends AppCompatActivity {
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
-                    imageURL = jsonObject.optString("image").replace("\\/", "/");;
+                    idImage = jsonObject.optInt("idImage");
+                    avgDiff = jsonObject.optInt("avgDiff");
+                    gamesPlayed = jsonObject.optInt("gamesPlayed");
+                    imageURL = jsonObject.optString("image").replace("\\/", "/");
                     age = jsonObject.optInt("age");
 
                     runOnUiThread(new Runnable() {

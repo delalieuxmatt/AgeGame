@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">AgeGame</string>
-    <string name="start">Start</string>
+    <string name="start">Age guess</string>
     <string name="don_t_have_an_account_sign_up_here">Don\'t have an account? Sign up here.</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
