@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+
     namespace = "com.kuleuven.agegame"
     compileSdk = 34
 
@@ -26,6 +27,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -41,4 +43,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+    // Amplify core dependency
+    implementation("com.amplifyframework:core:2.14.11")
+    // Support for Java 8 features
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.amplifyframework:aws-storage-s3:2.14.11")
+    implementation("com.amplifyframework:aws-auth-cognito:2.14.11")
+
 }
