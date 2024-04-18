@@ -100,7 +100,7 @@
         app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
 
     <Button
-        android:id="@+id/btnChooseImage"
+        android:id="@+id/amplifyTestPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button"

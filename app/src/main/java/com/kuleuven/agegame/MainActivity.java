@@ -1,7 +1,11 @@
 package com.kuleuven.agegame;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -28,7 +32,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
-    private Button btnStart, btnProfile;
+    private Button btnStart, btnProfile, uploadImg;
     private ImageView imgEasy, imgHard;
     private String db = "https://studev.groept.be/api/a23pt312/";
     private String imgHardURL = db + "imgEasy";
@@ -39,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         client = new OkHttpClient();
+
+        //configPerms(); does not work yet, for some reason can't click the thing?
+
         UserInfo userInfo = new UserInfo(getApplicationContext());
         if(!userInfo.fileExist()){
             startActivity(new Intent(MainActivity.this, RegistrationActivity.class));
@@ -70,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-
+        uploadImg.setOnClickListener(v->redirect(AmplifyTestPage.class));
 
 
         btnStart.setOnClickListener(new View.OnClickListener() {
@@ -84,17 +91,14 @@ public class MainActivity extends AppCompatActivity {
         btnProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
                 UserInfo userInfo = new UserInfo(getApplicationContext());
                 if(!userInfo.fileExist()){
+                    redirect(RegistrationActivity.class);
                     //Indicates that the user info has been initialised
-                    intent  = new Intent(MainActivity.this, RegistrationActivity.class);
-                    startActivity(intent);
                 }
                 else{
                     //Indicates that the user info has not been initialised
-                    intent = new Intent(MainActivity.this, ProfileActivity.class);
-                    startActivity(intent);
+                    redirect(ProfileActivity.class);
                 }
             }
         });
@@ -127,11 +131,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void redirect(Class<?> nextLocation){
+        Intent intent = new Intent(this, nextLocation);
+        startActivity(intent);
+    }
+
+    public void configPerms(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Environment.isExternalStorageManager()) {
+                // If the permission for storage usage was already granted, nothing should happen
+            } else {
+                //Otherwise an intent is opened to manage settings for app permissions
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            }
+        }
+    }
+
     private void initView(){
         btnStart = findViewById(R.id.btnStart);
         btnProfile = findViewById(R.id.btnProfile);
         imgEasy = findViewById(R.id.imgEasy);
         imgHard = findViewById(R.id.imgHard);
+        uploadImg = findViewById(R.id.uploadImg);
     }
 
 }

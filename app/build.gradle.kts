@@ -50,4 +50,5 @@ dependencies {
     implementation("com.amplifyframework:aws-storage-s3:2.14.11")
     implementation("com.amplifyframework:aws-auth-cognito:2.14.11")
 
+
 }

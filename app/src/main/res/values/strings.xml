@@ -16,4 +16,6 @@
     <string name="logout">Logout</string>
     <string name ="Start_new_game">Start new game</string>
     <string name="guess">Guess</string>
+    <string name="easiest_image">Easiest image</string>
+    <string name="upload_image">Upload Image</string>
 </resources>

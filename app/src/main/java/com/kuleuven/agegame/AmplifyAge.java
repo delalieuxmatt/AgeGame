@@ -9,7 +9,6 @@ import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin;
 import com.amplifyframework.core.Amplify;
 import com.amplifyframework.storage.s3.AWSS3StoragePlugin;
 
-
 public class AmplifyAge extends Application {
     public static void initializeAmplify(Context context) {
         try {
