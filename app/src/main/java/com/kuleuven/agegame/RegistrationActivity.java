@@ -22,7 +22,7 @@ import okhttp3.Response;
 
 public class RegistrationActivity extends AppCompatActivity {
     OkHttpClient client;
-    Button btnRegister, btnLogin, amplifyTestPage;
+    Button btnRegister, btnLogin;
     EditText edtTxtFirstName, edtTxtSecondName, edtTxtEmail, edtPassWord, edtPassWordAgain;
 
     String postURL = "https://studev.groept.be/api/a23pt312/Registration_POST";
@@ -34,26 +34,18 @@ public class RegistrationActivity extends AppCompatActivity {
         client = new OkHttpClient();
         initView();
         btnRegister.setOnClickListener(v -> registerUser());
-        amplifyTestPage.setOnClickListener(v->redirect());
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
-        });
+        btnLogin.setOnClickListener(v->redirect(LoginActivity.class));
 
     }
 
-    public void redirect(){
-        Intent intent = new Intent(RegistrationActivity.this, AmplifyTestPage.class);
+    public void redirect(Class<?> nextLocation){
+        Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
     }
 
     private void initView() {
         btnRegister = findViewById(R.id.btnRegister);
         btnLogin = findViewById(R.id.btnLogin);
-        amplifyTestPage= findViewById(R.id.amplifyTestPage);
         edtTxtFirstName = findViewById(R.id.edtTxtFirstName);
         edtTxtSecondName = findViewById(R.id.edtTxtSecondName);
         edtTxtEmail = findViewById(R.id.edtTxtEmail);

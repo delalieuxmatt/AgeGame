@@ -71,17 +71,15 @@ public class LoginActivity extends AppCompatActivity {
                                 JSONArray jsonArray = new JSONArray(responseData);
                                 JSONObject jsonObject = jsonArray.getJSONObject(0);
                                 String dbPassword = jsonObject.optString("Password");
-                                String dbID = jsonObject.optString("idRegistration");
+                                int dbID = jsonObject.optInt("idRegistration");
                                 String dbFirstName = jsonObject.optString("FirstName");
                                 String dbLastName = jsonObject.optString("LastName");
                                 String dbEmail = jsonObject.optString("Email");
                                 if (dbPassword.equals(password)) {
-                                    System.out.println(password);
-
                                     UserInfo userInfo = new UserInfo(getApplicationContext());
                                     userInfo.initInfo();
-                                    userInfo.writeInfo(dbFirstName,dbLastName,dbEmail);
-
+                                    System.out.println(dbFirstName + " " + dbLastName+ " " + dbEmail+ " " +dbID);
+                                    userInfo.writeInfo(dbFirstName,dbLastName,dbEmail,dbID);
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                 } else {

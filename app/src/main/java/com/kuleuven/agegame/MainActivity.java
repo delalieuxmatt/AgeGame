@@ -34,10 +34,9 @@ public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
     private Button btnStart, btnProfile, uploadImg;
     private ImageView imgEasy, imgHard;
-    private String db = "https://studev.groept.be/api/a23pt312/";
-    private String imgHardURL = db + "imgEasy";
-    private String imgEasyURL = db + "imgHard";
-    private String imageURL;
+    private String db = "https://studev.groept.be/api/a23pt312/randomImage";
+    private String imgHardURL = db;
+    private String imgEasyURL = db;
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -53,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
         //Changed how images are loaded, because we need to load two images
         //Concurrently we use this code instead!
+
+        //create a thread pool with 2 threads
+        //ExecutorService implements asynchronous execution
+
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         Future<String> easyImageFuture = executorService.submit(() -> imageGetter(imgEasyURL));
@@ -79,29 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
         uploadImg.setOnClickListener(v->redirect(AmplifyTestPage.class));
 
+        btnStart.setOnClickListener(v->redirect(singleGame.class));
 
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,singleGame.class);
-                startActivity(intent);
-            }
-        });
-
-        btnProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserInfo userInfo = new UserInfo(getApplicationContext());
-                if(!userInfo.fileExist()){
-                    redirect(RegistrationActivity.class);
-                    //Indicates that the user info has been initialised
-                }
-                else{
-                    //Indicates that the user info has not been initialised
-                    redirect(ProfileActivity.class);
-                }
-            }
-        });
+        btnProfile.setOnClickListener(v->profileLink());
     }
 
     private String imageGetter(String url) {
@@ -146,6 +129,18 @@ public class MainActivity extends AppCompatActivity {
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivity(intent);
             }
+        }
+    }
+
+    public void profileLink(){
+        UserInfo userInfo = new UserInfo(getApplicationContext());
+        if(!userInfo.fileExist()){
+            redirect(RegistrationActivity.class);
+            //Indicates that the user info has been initialised
+        }
+        else{
+            //Indicates that the user info has not been initialised
+            redirect(ProfileActivity.class);
         }
     }
 

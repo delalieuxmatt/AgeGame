@@ -69,13 +69,7 @@ public class AmplifyTestPage extends AppCompatActivity {
             }
         });
         btnImg.setOnClickListener(v -> openFileChooser());
-        btnHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AmplifyTestPage.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
+        btnHome.setOnClickListener(v->redirect(MainActivity.class));
     }
 
     private void openFileChooser() {
@@ -176,6 +170,11 @@ public class AmplifyTestPage extends AppCompatActivity {
         outputStream.close();
 
         return file;
+    }
+
+    public void redirect(Class<?> nextLocation){
+        Intent intent = new Intent(this, nextLocation);
+        startActivity(intent);
     }
 
     private void initView(){

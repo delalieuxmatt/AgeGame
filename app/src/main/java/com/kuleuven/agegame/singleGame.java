@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 
 import okhttp3.Call;
@@ -37,28 +38,62 @@ public class singleGame extends AppCompatActivity {
     OkHttpClient client;
     public boolean flag = true;
 
+
+    private String standardGuess_POST = "https://studev.groept.be/api/a23pt312/standardGuess_POST";
+
     private Button btnGuess, btnNewGame;
     private ImageButton btnHome;
     private EditText textGuess;
     private ImageView imgPerson;
-    private int roundsPlayed,roundsWon,totalDifference;
+    private int roundsWon;
     private String imageURL;
-    private int age, idImage, gamesPlayed, avgDiff;
-    private String imgDB = "https://studev.groept.be/api/a23pt312/img";
-    private String updateImgDB = "https://studev.groept.be/api/a23pt312/updateimg";
-    private String statsDB = "https://studev.groept.be/api/a23pt312/Stats";
-    private String gamesDB = "https://studev.groept.be/api/a23pt312/Games_POST";
+    private int age, imageID;
+    private String imgDB = "https://studev.groept.be/api/a23pt312/Images";
+    private String standardGame_POST = "https://studev.groept.be/api/a23pt312/standardGame_POST";
+    private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getGameID";
     private String correctMsg = "Well done, you got the age correct! You have won: " ;
     private String wrongMsg = "You got that one wrong, your streak was reset. The answer was: " ;
     private String failUpload = "failed to upload to games database";
     private String nextMsg = "Next";
     private String guessMsg = "Guess";
+    private String gameID, userID;
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_game);
         initView();
         client = new OkHttpClient();
         imageGetter();
+
+        //Initiate the game!!!
+        UserInfo userInfo = new UserInfo(getApplicationContext());
+        userID = userInfo.getID();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userID)
+                .build();
+        Request request = new Request.Builder()
+                .url(standardGame_POST)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(standardGame_POST);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if(!response.isSuccessful()){
+                    System.out.println("Unsuccessful");
+                }
+                else {
+                    System.out.println(request);
+                }
+            }
+        });
+        //We now look for the game id of the game we have just created so it can be used throughout the code
+        gameIDGetter();
+
         btnGuess.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,7 +101,9 @@ public class singleGame extends AppCompatActivity {
                     int guess = Integer.parseInt(textGuess.getText().toString());
                     flag = false;
                     btnGuess.setText(nextMsg);
+                    textGuess.setVisibility(View.INVISIBLE);
                     textGuess.setText("");
+                    int difference = abs(age-guess);
                     if (guess == age){
                         roundsWon++;
                         Toast.makeText(singleGame.this, correctMsg + roundsWon + " rounds", Toast.LENGTH_LONG).show();
@@ -74,23 +111,20 @@ public class singleGame extends AppCompatActivity {
                     else {
                         Toast.makeText(singleGame.this, wrongMsg + age, Toast.LENGTH_LONG).show();
                     }
-                    totalDifference += abs(age-guess);
-                    //Recalculate the average score for that image
-                    int avg = (avgDiff * gamesPlayed + abs(age-guess))/(gamesPlayed+1);
                     RequestBody requestBody = new FormBody.Builder()
-                            .add("avgdiff", String.valueOf(avg))
-                            .add("gp",String.valueOf(gamesPlayed+1))
-                            .add("id", String.valueOf(idImage))
+                            .add("gameid", gameID)
+                            .add("imageid",String.valueOf(imageID))
+                            .add("diff",String.valueOf(difference))
                             .build();
                     Request request = new Request.Builder()
-                            .url(updateImgDB)
+                            .url(standardGuess_POST)
                             .post(requestBody)
                             .build();
                     client.newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
                             e.printStackTrace();
-                            System.out.println(updateImgDB);
+                            System.out.println(standardGuess_POST);
                         }
 
                         @Override
@@ -107,45 +141,18 @@ public class singleGame extends AppCompatActivity {
                 }
                 else {
                     btnGuess.setText(guessMsg);
-                    roundsPlayed++;
+                    textGuess.setVisibility(View.VISIBLE);
                     imageGetter();
                 }
             }
         });
 
-        //New game means reset of the scores of the game after uploading the scores into the database
+        //New game means we just start a new game, not much really happens only creating a new game which is handled
+        //By an intent already. Simply call an intent
 
         btnNewGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserInfo userInfo = new UserInfo(getApplicationContext());
-                String email = userInfo.getEmail();
-                RequestBody requestBody = new FormBody.Builder()
-                        .add("w", String.valueOf(roundsWon))
-                        .add("pl", String.valueOf(roundsPlayed))
-                        .add("diff", String.valueOf(totalDifference))
-                        .add("email", email)
-                        .build();
-                Request request = new Request.Builder()
-                        .url(gamesDB)
-                        .post(requestBody)
-                        .build();
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                        System.out.println(gamesDB);
-                        Toast.makeText(singleGame.this, failUpload, Toast.LENGTH_LONG).show();
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) {
-                        if (!response.isSuccessful()) {
-                            System.out.println("Unsuccessful");
-                        }
-                    }
-                });
-
                 Intent intent = new Intent(singleGame.this,singleGame.class);
                 startActivity(intent);
             }
@@ -181,9 +188,7 @@ public class singleGame extends AppCompatActivity {
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
-                    idImage = jsonObject.optInt("idImage");
-                    avgDiff = jsonObject.optInt("avgDiff");
-                    gamesPlayed = jsonObject.optInt("gamesPlayed");
+                    imageID = jsonObject.optInt("idImage");
                     imageURL = jsonObject.optString("image").replace("\\/", "/");
                     age = jsonObject.optInt("age");
 
@@ -212,6 +217,41 @@ public class singleGame extends AppCompatActivity {
         btnNewGame = findViewById(R.id.btnNewGame);
         btnHome = findViewById(R.id.btnHome);
 
+    }
+
+    private void gameIDGetter(){
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid", userID)
+                .build();
+        Request request = new Request.Builder()
+                .url(gameIDGetter)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(gameIDGetter);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
+                try {
+                    JSONObject json = new JSONObject(responseData);
+                    gameID = json.getString("sGameID");
+
+                    // Now you have the sGameID, you can use it as needed
+                    // For example, you can pass it to another method or store it in a variable
+                    System.out.println("sGameID: " + gameID);
+
+                } catch (JSONException e) {
+                    // Handle JSON parsing error
+                    e.printStackTrace();
+                    System.out.println("Error parsing JSON response.");
+                }
+            }
+        });
     }
 }
 

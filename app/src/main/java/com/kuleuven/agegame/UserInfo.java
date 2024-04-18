@@ -2,6 +2,8 @@ package com.kuleuven.agegame;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,8 +12,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class UserInfo {
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
+public class UserInfo {
+    public String db = "https://studev.groept.be/api/a23pt312/getUserID";
+
+    String responseData;
     /*
     this class contain several methods to write, read or initialize user ID.
      */
@@ -45,7 +58,7 @@ public class UserInfo {
 
     }
 
-    public boolean writeInfo(String firstName, String lastName, String email){
+    public boolean writeInfo(String firstName, String lastName, String email, int dbID){
         if(!file.exists()){
             return false;
         }
@@ -59,6 +72,7 @@ public class UserInfo {
                     writer.write(firstName + '\n');
                     writer.write(lastName  + '\n');
                     writer.write(email  + '\n');
+                    writer.write(String.valueOf(dbID) + '\n');
                     writer.close();
                     return true;
                 } catch (IOException e) {
@@ -70,18 +84,18 @@ public class UserInfo {
         }
     }
 
-    String[] readFile(){
-        String[] userInfo = new String[3];
+    String[] readFile() {
+        String[] userInfo = new String[4];
         FileInputStream fis;
         try {
             fis = new FileInputStream(file);
-
             Scanner scanner = new Scanner(fis);
-            if(scanner.hasNext()){
-                userInfo[0] = scanner.next();
-                userInfo[1] = scanner.next();
-                userInfo[2] = scanner.next();
+            int i = 0;
+            while (scanner.hasNextLine() && i < 4) {
+                userInfo[i] = scanner.nextLine();
+                i++;
             }
+            scanner.close();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -97,6 +111,7 @@ public class UserInfo {
     public String getEmail(){
         return readFile()[2];
     }
+    public String getID(){return readFile()[3];}
 
     public boolean deleteFile(){
         return file.delete();
