@@ -37,10 +37,7 @@ import okhttp3.Response;
 public class singleGame extends AppCompatActivity {
     OkHttpClient client;
     public boolean flag = true;
-
-
     private String standardGuess_POST = "https://studev.groept.be/api/a23pt312/standardGuess_POST";
-
     private Button btnGuess, btnNewGame;
     private ImageButton btnHome;
     private EditText textGuess;
@@ -111,6 +108,7 @@ public class singleGame extends AppCompatActivity {
                     else {
                         Toast.makeText(singleGame.this, wrongMsg + age, Toast.LENGTH_LONG).show();
                     }
+                    System.out.println(gameID);
                     RequestBody requestBody = new FormBody.Builder()
                             .add("gameid", gameID)
                             .add("imageid",String.valueOf(imageID))
@@ -238,8 +236,9 @@ public class singleGame extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseData = response.body().string();
                 try {
-                    JSONObject json = new JSONObject(responseData);
-                    gameID = json.getString("sGameID");
+                    JSONArray jsonArray = new JSONArray(responseData);
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    gameID = jsonObject.optString("sGameID");
 
                     // Now you have the sGameID, you can use it as needed
                     // For example, you can pass it to another method or store it in a variable
