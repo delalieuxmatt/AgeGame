@@ -18,4 +18,6 @@
     <string name="guess">Guess</string>
     <string name="easiest_image">Easiest image</string>
     <string name="upload_image">Upload Image</string>
+    <string name="played">Played</string>
+    <string name="accuracy">Accuracy</string>
 </resources>
