@@ -20,4 +20,9 @@
     <string name="upload_image">Upload Image</string>
     <string name="played">Played</string>
     <string name="accuracy">Accuracy</string>
+    <string name="enter_player_count">Enter player count</string>
+    <string name="enter_time_limit">Enter time limit</string>
+    <string name="start_game">Start Game</string>
+    <string name="players_are_joining">Players are joining...</string>
+    <string name="enter_gameid">Enter gameID</string>
 </resources>

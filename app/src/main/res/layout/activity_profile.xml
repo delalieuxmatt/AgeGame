@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnProfileHome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home"
@@ -30,7 +30,7 @@
         app:layout_constraintVertical_bias="0.023" />
 
     <Button
-        android:id="@+id/btnProfileHome"
+        android:id="@+id/btnProfileLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/logout"
@@ -72,7 +72,7 @@
         android:layout_marginBottom="240dp"
         android:text="@string/email"
         android:textSize="34sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnProfileHome"
+        app:layout_constraintBottom_toTopOf="@+id/btnProfileLogout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
@@ -96,7 +96,7 @@
         android:layout_marginBottom="80dp"
         android:text="@string/accuracy"
         android:textSize="28sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnProfileHome"
+        app:layout_constraintBottom_toTopOf="@+id/btnProfileLogout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.145"
         app:layout_constraintStart_toStartOf="parent" />
@@ -120,7 +120,7 @@
         android:layout_marginBottom="80dp"
         android:text="@string/accuracy"
         android:textSize="28sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnProfileHome"
+        app:layout_constraintBottom_toTopOf="@+id/btnProfileLogout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.834"
         app:layout_constraintStart_toStartOf="parent" />

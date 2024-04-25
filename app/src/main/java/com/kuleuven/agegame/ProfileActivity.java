@@ -3,7 +3,6 @@ package com.kuleuven.agegame;
 
 import static java.lang.Integer.parseInt;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -49,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnProfileHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println("test");
                 Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -67,7 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     public void initView(){
         btnProfileHome = findViewById(R.id.btnProfileHome);
-        btnProfileLogout = findViewById(R.id.btnProfileHome);
+        btnProfileLogout = findViewById(R.id.btnProfileLogout);
         txtFirstName = findViewById(R.id.txtProfileFirstName);
         txtLastName = findViewById(R.id.txtProfileLastName);
         txtEmail = findViewById(R.id.txtProfileEmail);
@@ -91,9 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void singleStats(){
-        System.out.println("WE ARE IN THE STATS NOW");
         client = new OkHttpClient();
-        System.out.println(userID + "UserID");
         RequestBody requestBody = new FormBody.Builder()
                 .add("userID", userID)
                 .build();
