@@ -4,7 +4,6 @@ import static java.lang.Math.abs;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.PixelCopy;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
 
 import okhttp3.Call;
@@ -213,7 +211,7 @@ public class singleGame extends AppCompatActivity {
         btnGuess = findViewById(R.id.btnGuess);
         textGuess = findViewById(R.id.textGuess);
         btnNewGame = findViewById(R.id.btnNewGame);
-        btnHome = findViewById(R.id.btnHome);
+        btnHome = findViewById(R.id.btnHomeWaitMulti);
 
     }
 

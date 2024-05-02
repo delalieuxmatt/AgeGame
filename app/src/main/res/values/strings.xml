@@ -25,4 +25,6 @@
     <string name="start_game">Start Game</string>
     <string name="players_are_joining">Players are joining...</string>
     <string name="enter_gameid">Enter gameID</string>
+    <string name="start_HLMulti">Start</string>
+    <string name="join_HLMulti">Join</string>
 </resources>

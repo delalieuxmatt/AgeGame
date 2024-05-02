@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -181,7 +180,7 @@ public class AmplifyTestPage extends AppCompatActivity {
         testImg = findViewById(R.id.testImg);
         btnImg = findViewById(R.id.btnImg);
         enterAge = findViewById(R.id.enterAge);
-        btnHome = findViewById(R.id.btnHome);
+        btnHome = findViewById(R.id.btnHomeWaitMulti);
         enterFileName = findViewById(R.id.enterFileName);
     }
 

@@ -29,6 +29,9 @@
             android:name=".RegistrationActivity"
             android:exported="false" />
         <activity
+            android:name=".WaitMultiplayer"
+            android:exported="false" />
+        <activity
             android:name=".AmplifyTestPage"
             android:exported="false" />
         <activity
