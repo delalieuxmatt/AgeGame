@@ -43,12 +43,11 @@ public class singleGame extends AppCompatActivity {
     private int roundsWon;
     private String imageURL;
     private int age, imageID;
-    private String imgDB = "https://studev.groept.be/api/a23pt312/Images";
+    private String imgDB = "https://studev.groept.be/api/a23pt312/randomImage";
     private String standardGame_POST = "https://studev.groept.be/api/a23pt312/standardGame_POST";
     private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getGameID";
     private String correctMsg = "Well done, you got the age correct! You have won: " ;
     private String wrongMsg = "You got that one wrong, your streak was reset. The answer was: " ;
-    private String failUpload = "failed to upload to games database";
     private String nextMsg = "Next";
     private String guessMsg = "Guess";
     private String gameID, userID;
@@ -98,7 +97,7 @@ public class singleGame extends AppCompatActivity {
                     btnGuess.setText(nextMsg);
                     textGuess.setVisibility(View.INVISIBLE);
                     textGuess.setText("");
-                    int difference = abs(age-guess);
+                    int difference = age-guess;
                     if (guess == age){
                         roundsWon++;
                         Toast.makeText(singleGame.this, correctMsg + roundsWon + " rounds", Toast.LENGTH_LONG).show();
@@ -227,7 +226,7 @@ public class singleGame extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                System.out.println(gameIDGetter);
+                System.out.println("gameID is:" + gameIDGetter);
             }
 
             @Override
@@ -236,11 +235,11 @@ public class singleGame extends AppCompatActivity {
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
-                    gameID = jsonObject.optString("sGameID");
+                    gameID = jsonObject.optString("gameID");
 
-                    // Now you have the sGameID, you can use it as needed
+                    // Now you have the gameID, you can use it as needed
                     // For example, you can pass it to another method or store it in a variable
-                    System.out.println("sGameID: " + gameID);
+                    System.out.println("gameID: " + gameID);
 
                 } catch (JSONException e) {
                     // Handle JSON parsing error

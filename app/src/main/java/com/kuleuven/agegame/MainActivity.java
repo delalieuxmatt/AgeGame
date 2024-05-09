@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnProfile.setOnClickListener(v->profileLink());
 
-        btnCreateMultiHL.setOnClickListener(v->redirect(CreateMultiplayer.class));
+        btnCreateMultiHL.setOnClickListener(v->redirect(imagesPlayed.class));
 
         btnWaitMultiHL.setOnClickListener(v->redirect(WaitMultiplayer.class));
     }
