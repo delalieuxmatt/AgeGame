@@ -27,6 +27,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         TextView age;
         TextView yourGuess;
 
+
         public ImageViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_view);
