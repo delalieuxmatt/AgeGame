@@ -119,11 +119,12 @@ public class imagesPlayed extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseData = response.body().string();
+                System.out.println(responseData);
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     for (int j = 0; j < jsonArray.length(); j++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(j);
-                        String imageID = jsonObject.optString("idimage");
+                        String imageID = jsonObject.optString("imageid");
                         String gameID = jsonObject.optString("gameid");
                         int age = jsonObject.optInt("age");
                         System.out.println(age);

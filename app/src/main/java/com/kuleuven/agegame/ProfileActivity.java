@@ -28,7 +28,7 @@ import okhttp3.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    Button btnProfileHome, btnProfileLogout;
+    Button btnProfileHome, btnProfileLogout, btnStats;
     TextView txtFirstName, txtLastName, txtEmail, singlePlayed, singleAccuracy, hlPlayed;
     OkHttpClient client;
     String userID;
@@ -63,19 +63,10 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        btnStats.setOnClickListener(v->redirect(imagesPlayed.class));
     }
 
-    public void initView(){
-        btnProfileHome = findViewById(R.id.btnProfileHome);
-        btnProfileLogout = findViewById(R.id.btnProfileLogout);
-        txtFirstName = findViewById(R.id.txtProfileFirstName);
-        txtLastName = findViewById(R.id.txtProfileLastName);
-        txtEmail = findViewById(R.id.txtProfileEmail);
-        singlePlayed = findViewById(R.id.singlePlayed);
-        singleAccuracy = findViewById(R.id.singleAccuracy);
-        hlPlayed = findViewById(R.id.hlPlayed);
-
-    }
 
     public void initProfile(){
         UserInfo userInfo = new UserInfo(getApplicationContext());
@@ -89,6 +80,12 @@ public class ProfileActivity extends AppCompatActivity {
         //hlPlayed.setText(String.valueOf(userID)); to check the user ID uncomment for now
 
     }
+
+    public void redirect(Class<?> nextLocation){
+        Intent intent = new Intent(this, nextLocation);
+        startActivity(intent);
+    }
+
 
     public void singleStats(){
         client = new OkHttpClient();
@@ -123,6 +120,18 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+    public void initView(){
+        btnProfileHome = findViewById(R.id.btnProfileHome);
+        btnProfileLogout = findViewById(R.id.btnProfileLogout);
+        txtFirstName = findViewById(R.id.txtProfileFirstName);
+        txtLastName = findViewById(R.id.txtProfileLastName);
+        txtEmail = findViewById(R.id.txtProfileEmail);
+        singlePlayed = findViewById(R.id.singlePlayed);
+        singleAccuracy = findViewById(R.id.singleAccuracy);
+        hlPlayed = findViewById(R.id.hlPlayed);
+        btnStats = findViewById(R.id.btnStats);
+
     }
 
 }

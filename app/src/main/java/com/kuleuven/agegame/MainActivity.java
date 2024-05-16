@@ -30,9 +30,7 @@ public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
     private Button btnStart, btnProfile, uploadImg, btnCreateMultiHL,btnWaitMultiHL;
     private ImageView imgEasy, imgHard;
-    private String db = "https://studev.groept.be/api/a23pt312/randomImage";
-    private String imgHardURL = db;
-    private String imgEasyURL = db;
+    private final String db = "https://studev.groept.be/api/a23pt312/standardImageRanking";
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -53,9 +51,8 @@ public class MainActivity extends AppCompatActivity {
         //ExecutorService implements asynchronous execution
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-        Future<String> easyImageFuture = executorService.submit(() -> imageGetter(imgEasyURL));
-        Future<String> hardImageFuture = executorService.submit(() -> imageGetter(imgHardURL));
+        Future<String> easyImageFuture = executorService.submit(() -> imageGetter(db, 0));
+        Future<String> hardImageFuture = executorService.submit(() -> imageGetter(db, -1));
 
         executorService.shutdown();
 
@@ -82,12 +79,12 @@ public class MainActivity extends AppCompatActivity {
 
         btnProfile.setOnClickListener(v->profileLink());
 
-        btnCreateMultiHL.setOnClickListener(v->redirect(imagesPlayed.class));
+        btnCreateMultiHL.setOnClickListener(v->redirect(CreateMultiplayer.class));
 
         btnWaitMultiHL.setOnClickListener(v->redirect(WaitMultiplayer.class));
     }
 
-    private String imageGetter(String url) {
+    private String imageGetter(String url, int index) {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
@@ -96,18 +93,22 @@ public class MainActivity extends AppCompatActivity {
         try {
             Response response = client.newCall(request).execute();
             String responseData = response.body().string();
-            return parseImageURL(responseData);
+            return parseImageURL(responseData, index);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
         }
     }
 
-    private String parseImageURL(String responseData) {
+    private String parseImageURL(String responseData, int index) {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
-            JSONObject jsonObject = jsonArray.getJSONObject(0);
-            return jsonObject.optString("image").replace("\\/", "/");
+            if(index == -1){
+                index = jsonArray.length()-1;
+            }
+            JSONObject jsonObject = jsonArray.getJSONObject(index);
+            System.out.println(jsonObject.optString("imageURL").replace("\\/", "/"));
+            return jsonObject.optString("imageURL").replace("\\/", "/");
         } catch (JSONException e) {
             e.printStackTrace();
             return "";
