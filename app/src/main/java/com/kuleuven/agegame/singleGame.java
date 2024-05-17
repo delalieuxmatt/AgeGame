@@ -135,9 +135,14 @@ public class singleGame extends AppCompatActivity {
 
                 }
                 else {
-                    btnGuess.setText(guessMsg);
-                    textGuess.setVisibility(View.VISIBLE);
-                    imageGetter();
+                    if(btnGuess.getText().equals(nextMsg)) {
+                        btnGuess.setText(guessMsg);
+                        textGuess.setVisibility(View.VISIBLE);
+                        imageGetter();
+                    }
+                    else{
+                        Toast.makeText(singleGame.this, "Please enter data before clicking next", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -183,7 +188,7 @@ public class singleGame extends AppCompatActivity {
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
-                    imageID = jsonObject.optInt("idImage");
+                    imageID = jsonObject.optInt("imageID");
                     imageURL = jsonObject.optString("image").replace("\\/", "/");
                     age = jsonObject.optInt("age");
 
@@ -236,7 +241,6 @@ public class singleGame extends AppCompatActivity {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                     gameID = jsonObject.optString("gameID");
-
                     // Now you have the gameID, you can use it as needed
                     // For example, you can pass it to another method or store it in a variable
                     System.out.println("gameID: " + gameID);
