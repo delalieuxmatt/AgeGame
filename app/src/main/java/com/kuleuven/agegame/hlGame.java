@@ -47,7 +47,6 @@ public class hlGame extends AppCompatActivity {
     private int agesecond, imageIDsecond;
     private String imageURLfirst, imageURLsecond;
     private TextView txtAge;
-    private UserInfo userInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +55,7 @@ public class hlGame extends AppCompatActivity {
         initView();
         client = new OkHttpClient();
 
-        userInfo = new UserInfo(getApplicationContext());
+        UserInfo userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
         createGame();
         getGameID();
@@ -66,7 +65,26 @@ public class hlGame extends AppCompatActivity {
         RequestBody requestBody = new FormBody.Builder()
                 .add("userid", userID)
                 .build();
-        userInfo.enqPost(hlgamePost, requestBody);
+        Request request = new Request.Builder()
+                .url(hlgamePost)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(hlgamePost);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful");
+                } else {
+                    System.out.println("Game created: " + response.body().string());
+                }
+            }
+        });
     }
 
     private void getGameID() {
@@ -134,7 +152,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDfirst = jsonObject.optInt("imageID");
+            imageIDfirst = jsonObject.optInt("idImage");
             imageURLfirst = jsonObject.optString("image").replace("\\/", "/");
             agefirst = jsonObject.optInt("age");
 
@@ -182,7 +200,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDsecond = jsonObject.optInt("imageID");
+            imageIDsecond = jsonObject.optInt("idImage");
             imageURLsecond = jsonObject.optString("image").replace("\\/", "/");
             agesecond = jsonObject.optInt("age");
 
@@ -215,7 +233,6 @@ public class hlGame extends AppCompatActivity {
 
     private void startNextRound() {
         // Set the second image of the current round as the first image of the next round
-        System.out.println("Image IDs were:" + imageIDfirst + " " +  imageIDsecond);
         imageIDfirst = imageIDsecond;
         imageURLfirst = imageURLsecond;
         agefirst = agesecond;
@@ -239,7 +256,27 @@ public class hlGame extends AppCompatActivity {
                 .add("imageidtwo", String.valueOf(imageIDsecond))
                 .add("correct", String.valueOf(correctGuess))
                 .build();
-        userInfo.enqPost(guessPOST, requestBody);
+        Request request = new Request.Builder()
+                .url(guessPOST)
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(guessPOST);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful guess submission");
+                } else {
+                    System.out.println("Guess submitted: " + response.body().string());
+                }
+            }
+        });
     }
     public void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
