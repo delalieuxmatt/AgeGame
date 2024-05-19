@@ -152,7 +152,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDfirst = jsonObject.optInt("idImage");
+            imageIDfirst = jsonObject.optInt("imageID");
             imageURLfirst = jsonObject.optString("image").replace("\\/", "/");
             agefirst = jsonObject.optInt("age");
 
@@ -200,7 +200,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDsecond = jsonObject.optInt("idImage");
+            imageIDsecond = jsonObject.optInt("imageID");
             imageURLsecond = jsonObject.optString("image").replace("\\/", "/");
             agesecond = jsonObject.optInt("age");
 
@@ -233,6 +233,7 @@ public class hlGame extends AppCompatActivity {
 
     private void startNextRound() {
         // Set the second image of the current round as the first image of the next round
+        System.out.println("Image IDs were:" + imageIDfirst + " " +  imageIDsecond);
         imageIDfirst = imageIDsecond;
         imageURLfirst = imageURLsecond;
         agefirst = agesecond;
@@ -274,6 +275,7 @@ public class hlGame extends AppCompatActivity {
                     System.out.println("Unsuccessful guess submission");
                 } else {
                     System.out.println("Guess submitted: " + response.body().string());
+                    //System.out.println("Image IDs were:" + imageIDfirst + " " +  imageIDsecond);
                 }
             }
         });
