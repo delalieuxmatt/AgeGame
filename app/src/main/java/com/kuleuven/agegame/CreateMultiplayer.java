@@ -30,17 +30,19 @@ public class CreateMultiplayer extends AppCompatActivity {
     private Button btnCreateGame, btnJoinGame;
     private ImageButton btnHomeCreateMulti;
     private EditText edtTimeLimit, edtRounds;
-    public String gameID, creatorID, formattedTime;
+    public String gameID, creatorID, startTime, rounds, timeLimit;
     private OkHttpClient client;
 
     private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getMultiGameID";
     private String hlMultiplayerGames_POST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGames_POST";
+    private UserInfo userInfo;
+
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_create);
-        UserInfo userInfo = new UserInfo(getApplicationContext());
         initView();
         btnJoinGame.setVisibility(View.INVISIBLE);
+        userInfo = new UserInfo(getApplicationContext());
         creatorID = userInfo.getID();
         client = new OkHttpClient();
         btnCreateGame.setOnClickListener(v->createGame());
@@ -48,39 +50,18 @@ public class CreateMultiplayer extends AppCompatActivity {
         btnJoinGame.setOnClickListener(v->redirect2(WaitMultiplayer.class));
     }
     private void createGame(){
-        String timeLimit = edtTimeLimit.getText().toString();
-        String rounds = edtRounds.getText().toString();
+        timeLimit = edtTimeLimit.getText().toString();
+        rounds = edtRounds.getText().toString();
         LocalTime time = LocalTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        formattedTime = time.format(formatter);
+        startTime = time.format(formatter);
         RequestBody requestBody = new FormBody.Builder()
                 .add("timelimit", timeLimit)
                 .add("creatorid", creatorID)
                 .add("rounds",rounds)
-                .add("starttime", formattedTime)
+                .add("starttime", startTime)
                 .build();
-        Request request = new Request.Builder()
-                .url(hlMultiplayerGames_POST)
-                .post(requestBody)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(hlMultiplayerGames_POST);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(!response.isSuccessful()){
-                    System.out.println("Unsuccessful");
-                }
-                else {
-                    gameIDGetter();
-                    System.out.println(hlMultiplayerGames_POST);
-                }
-            }
-        });
+        userInfo.enqPost(hlMultiplayerGames_POST, requestBody);
         btnCreateGame.setVisibility(View.INVISIBLE);
         btnJoinGame.setVisibility(View.VISIBLE);
     }
@@ -130,6 +111,9 @@ public class CreateMultiplayer extends AppCompatActivity {
         System.out.println("Testing GAME ID: " + gameID);
         intent.putExtra("gameID",gameID);
         intent.putExtra("creator", creatorID);
+        intent.putExtra("rounds", rounds);
+        intent.putExtra("timeLimit", timeLimit);
+        intent.putExtra("startTime", startTime);
         startActivity(intent);
     }
 

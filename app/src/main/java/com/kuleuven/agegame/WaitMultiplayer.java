@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -30,19 +32,22 @@ import okhttp3.Response;
 public class WaitMultiplayer extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private OkHttpClient client;
-    private String gameID, creator, userID, status;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private String gameID, creator, status, userID, rounds, timeLimit;
     private Button btnStartGame, btnJoin;
+    private LocalTime startTime;
     private ImageButton btnHomeWaitMulti;
     private EditText edtGameID;
     public boolean isCreator = false, isFirst = true;
-    private String hlMultiplayerPlayer_POST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
     private String getStatus = "https://studev.groept.be/api/a23pt312/getMultiGameStatus";
 
     private final String setStatus = "https://studev.groept.be/api/a23pt312/setMultiGameStatus/";
+    private UserInfo userInfo;
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_waiting);
-        UserInfo userInfo = new UserInfo(getApplicationContext());
+        userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
         initView();
         client = new OkHttpClient();
@@ -99,12 +104,23 @@ public class WaitMultiplayer extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseData = response.body().string();
                 try {
-                    //JSONObject jsonObject = new JSONObject(responseData);
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                     status = jsonObject.optString("started");
+                    String dbTime = jsonObject.optString("startTime");
+                    startTime = LocalTime.parse(dbTime, formatter);
+                    rounds = jsonObject.optString("rounds");
+                    timeLimit = jsonObject.optString("timeLimit");
                     if(status.equals("1")){
-                        redirect(singleGame.class); //change to hlMultigame!!!!!!!!!!!!!!!!!!!!!
+                        Intent intent = new Intent(WaitMultiplayer.this, hlMultiGame.class);
+                        //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
+                        System.out.println("Testing GAME ID: " + gameID);
+                        intent.putExtra("gameID",gameID);
+                        intent.putExtra("rounds", rounds);
+                        intent.putExtra("timeLimit", timeLimit);
+                        intent.putExtra("startTime", startTime);
+                        intent.putExtra("creator", creator);
+                        startActivity(intent);
                     } else {
                         isFirst = false;
                         // Schedule the next check after 5 seconds
@@ -132,21 +148,7 @@ public class WaitMultiplayer extends AppCompatActivity {
                 .add("gameid", gameID)
                 .add("started", "1")
                 .build();
-        Request request = new Request.Builder()
-                .url(setStatus)
-                .post(requestBody)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String responseData = response.body().string();
-            }
-        });
+        userInfo.enqPost(setStatus, requestBody);
     }
 
     public void hide(){

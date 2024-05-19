@@ -51,6 +51,7 @@ public class singleGame extends AppCompatActivity {
     private String nextMsg = "Next";
     private String guessMsg = "Guess";
     private String gameID, userID;
+    private UserInfo userInfo;
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_game);
@@ -59,32 +60,12 @@ public class singleGame extends AppCompatActivity {
         imageGetter();
 
         //Initiate the game!!!
-        UserInfo userInfo = new UserInfo(getApplicationContext());
+        userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
         RequestBody requestBody = new FormBody.Builder()
                 .add("userid",userID)
                 .build();
-        Request request = new Request.Builder()
-                .url(standardGame_POST)
-                .post(requestBody)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(standardGame_POST);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(!response.isSuccessful()){
-                    System.out.println("Unsuccessful");
-                }
-                else {
-                    System.out.println(request);
-                }
-            }
-        });
+        userInfo.enqPost(standardGame_POST, requestBody);
         //We now look for the game id of the game we have just created so it can be used throughout the code
         gameIDGetter();
 

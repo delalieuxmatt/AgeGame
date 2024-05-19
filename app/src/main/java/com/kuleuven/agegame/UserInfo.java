@@ -117,5 +117,29 @@ public class UserInfo {
         return file.delete();
     }
 
+    public void enqPost(String url, RequestBody rb){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(rb)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful on " + url);
+                } else {
+                    System.out.println("Success on " + url +  " with response: " + response.body().string());
+                }
+            }
+        });
+    }
+
 }
 

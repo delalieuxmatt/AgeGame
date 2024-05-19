@@ -41,6 +41,9 @@
             android:name=".imagesPlayed"
             android:exported="false" />
         <activity
+            android:name=".hlMultiGame"
+            android:exported="false" />
+        <activity
             android:name=".hlGame"
             android:exported="false"
             android:enableOnBackInvokedCallback="true"
