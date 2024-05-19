@@ -44,7 +44,7 @@ public class hlMultiGame extends AppCompatActivity {
 
     private String imgDB = "https://studev.groept.be/api/a23pt312/randomImage";
     private String guessPOST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
-    private String hlgamePost = "https://studev.groept.be/api/a23pt312/hlMultiplayerGames_POST";
+    private String hlMulti_Post = "https://studev.groept.be/api/a23pt312/hlMultiplayerGames_POST";
     private String hlMultiplayerRound;
     private String gameID, userID, imageURLfirst, imageURLsecond, rounds, timeLimit, creator;
     private int agefirst, imageIDfirst, agesecond, imageIDsecond;
@@ -62,8 +62,6 @@ public class hlMultiGame extends AppCompatActivity {
         userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
         System.out.println("userID is: " + userID);
-        createGame();
-        //getGameID();
         Bundle extras = getIntent().getExtras();
         gameID = extras.getString("gameID");
         rounds = extras.getString("rounds");
@@ -71,20 +69,30 @@ public class hlMultiGame extends AppCompatActivity {
         String time = extras.getString("startTime");
         creator = extras.getString("creator");
         startTime = LocalTime.parse(time, formatter);
+        if(userID.equals(creator)){
+            createGame();
+            //the idea is that it works very similar to the way hlGame works, the creator simply generates
+            //each round, whilst the rest leaches off what is created
+        } else {
+            joinGame();
+        }
+
         System.out.println(gameID);
         loadInitialImages();
     }
 
     private void createGame() {
-        //We want to make it so that whoever has the creator ID will generate x images, x being the number of rounds
-        //this will be done by creating a first round with image1 and image2
-        //then at the end of each round creating a new round with image2 and image3
         RequestBody requestBody = new FormBody.Builder()
                 .add("userid", userID)
                 .build();
-        userInfo.enqPost(hlgamePost, requestBody);
-        generateFirstRound();
+        userInfo.enqPost(hlMulti_Post, requestBody);
     }
+
+    private void joinGame(){
+        //This should retrieve the latest entry in the rounds table and dispaly it within the stuff :)
+    }
+
+
     private void loadInitialImages() {
         // Load the initial images for the first round
         loadFirstImage();
@@ -263,12 +271,7 @@ public class hlMultiGame extends AppCompatActivity {
                 .add("imageidtwo", String.valueOf(imageIDsecond))
                 .build();
         userInfo.enqPost(hlMultiplayerRound, requestBody);
-
     }
-
-
-
-
 
     private void initView() {
         imgknown = findViewById(R.id.imagefirst);

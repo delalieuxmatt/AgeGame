@@ -152,7 +152,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDfirst = jsonObject.optInt("idImage");
+            imageIDfirst = jsonObject.optInt("imageID");
             imageURLfirst = jsonObject.optString("image").replace("\\/", "/");
             agefirst = jsonObject.optInt("age");
 
@@ -200,7 +200,7 @@ public class hlGame extends AppCompatActivity {
         try {
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDsecond = jsonObject.optInt("idImage");
+            imageIDsecond = jsonObject.optInt("imageID");
             imageURLsecond = jsonObject.optString("image").replace("\\/", "/");
             agesecond = jsonObject.optInt("age");
 
