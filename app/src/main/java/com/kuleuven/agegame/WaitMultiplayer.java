@@ -2,6 +2,8 @@ package com.kuleuven.agegame;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +12,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -22,13 +28,17 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class WaitMultiplayer extends AppCompatActivity {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private OkHttpClient client;
-    private String gameID, creator, userID;
-    private Button startGame, btnJoin;
+    private String gameID, creator, userID, status;
+    private Button btnStartGame, btnJoin;
     private ImageButton btnHomeWaitMulti;
     private EditText edtGameID;
-    public boolean isCreator = false;
+    public boolean isCreator = false, isFirst = true;
     private String hlMultiplayerPlayer_POST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
+    private String getStatus = "https://studev.groept.be/api/a23pt312/getMultiGameStatus";
+
+    private final String setStatus = "https://studev.groept.be/api/a23pt312/setMultiGameStatus/";
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_waiting);
@@ -52,40 +62,89 @@ public class WaitMultiplayer extends AppCompatActivity {
             String msg = "The gameID is: " + gameID + ". Inform your friends! Once you are ready, press start game ";
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         }
+        else{
+            btnStartGame.setVisibility(View.INVISIBLE);
+        }
         btnJoin.setOnClickListener(v->joinRoutine());
+
+        btnStartGame.setOnClickListener(v->startGame()); //fix this method
 
         //Ensure that if you did not create the game, you cannot start it by hiding the button!
         btnHomeWaitMulti.setOnClickListener(v->redirect(MainActivity.class));
     }
+
     public void joinRoutine(){
         if(!isCreator){
             gameID = edtGameID.getText().toString();
         }
-        edtGameID.setVisibility(View.INVISIBLE);
+        if(!isFirst){
+            String msg = "The game has not started yet, we will check again in 5s";
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        }
+        hide();
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid",gameID)
-                .add("userid",userID)
                 .build();
         Request request = new Request.Builder()
-                .url(hlMultiplayerPlayer_POST)
+                .url(getStatus)
                 .post(requestBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                System.out.println(hlMultiplayerPlayer_POST);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(!response.isSuccessful()){
-                    System.out.println("Unsuccessful");
-                }
-                else {
-                    redirect(hlGame.class);
+                String responseData = response.body().string();
+                try {
+                    //JSONObject jsonObject = new JSONObject(responseData);
+                    JSONArray jsonArray = new JSONArray(responseData);
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    status = jsonObject.optString("started");
+                    if(status.equals("1")){
+                        redirect(singleGame.class); //change to hlMultigame!!!!!!!!!!!!!!!!!!!!!
+                    } else {
+                        isFirst = false;
+                        // Schedule the next check after 5 seconds
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                joinRoutine();
+                            }
+                        }, 5000);
+                    }
 
+                    // Now you have the gameID, you can use it as needed
+                    System.out.println("The game status is (0/not started, 1/started: " + status);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    System.out.println("Error parsing JSON response.");
                 }
+            }
+        });
+    }
+
+    public void startGame(){
+        RequestBody requestBody = new FormBody.Builder()
+                .add("gameid", gameID)
+                .add("started", "1")
+                .build();
+        Request request = new Request.Builder()
+                .url(setStatus)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
             }
         });
     }
@@ -100,7 +159,7 @@ public class WaitMultiplayer extends AppCompatActivity {
     }
 
     public void initView(){
-        //startGame = findViewById(R.id.startGame);
+        btnStartGame = findViewById(R.id.btnStartGame);
         edtGameID = findViewById(R.id.edtGameID);
         btnHomeWaitMulti = findViewById(R.id.btnHomeWaitMulti);
         btnJoin = findViewById(R.id.btnJoin);

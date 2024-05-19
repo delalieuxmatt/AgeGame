@@ -28,7 +28,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     OkHttpClient client;
-    private Button btnStart, btnProfile, uploadImg, btnCreateMultiHL,btnWaitMultiHL;
+    private Button btnStart, btnProfile, uploadImg, btnCreateMultiHL,btnWaitMultiHL, btnHLStart;
     private ImageView imgEasy, imgHard;
     private final String db = "https://studev.groept.be/api/a23pt312/standardImageRanking";
     protected void onCreate(Bundle savedInstanceState){
@@ -51,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
         //ExecutorService implements asynchronous execution
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Future<String> easyImageFuture = executorService.submit(() -> imageGetter(db, 0));
-        Future<String> hardImageFuture = executorService.submit(() -> imageGetter(db, -1));
+        Future<String> easyImageFuture = executorService.submit(() -> imageGetter(0));
+        Future<String> hardImageFuture = executorService.submit(() -> imageGetter(-1));
 
         executorService.shutdown();
 
@@ -82,11 +82,13 @@ public class MainActivity extends AppCompatActivity {
         btnCreateMultiHL.setOnClickListener(v->redirect(CreateMultiplayer.class));
 
         btnWaitMultiHL.setOnClickListener(v->redirect(WaitMultiplayer.class));
+
+        btnHLStart.setOnClickListener(v->redirect(hlGame.class));
     }
 
-    private String imageGetter(String url, int index) {
+    private String imageGetter(int index) {
         Request request = new Request.Builder()
-                .url(url)
+                .url(db)
                 .get()
                 .build();
 
@@ -153,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         uploadImg = findViewById(R.id.uploadImg);
         btnCreateMultiHL = findViewById(R.id.btnCreateMultiHL);
         btnWaitMultiHL = findViewById(R.id.btnWaitMultiHL);
+        btnHLStart = findViewById(R.id.btnHLStart);
     }
 
 }

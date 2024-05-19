@@ -15,6 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -27,8 +29,8 @@ import okhttp3.Response;
 public class CreateMultiplayer extends AppCompatActivity {
     private Button btnCreateGame, btnJoinGame;
     private ImageButton btnHomeCreateMulti;
-    private EditText edtTimeLimit;
-    public String gameID, creatorID;
+    private EditText edtTimeLimit, edtRounds;
+    public String gameID, creatorID, formattedTime;
     private OkHttpClient client;
 
     private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getMultiGameID";
@@ -42,14 +44,20 @@ public class CreateMultiplayer extends AppCompatActivity {
         creatorID = userInfo.getID();
         client = new OkHttpClient();
         btnCreateGame.setOnClickListener(v->createGame());
-        btnHomeCreateMulti.setOnClickListener(v->redirect2(MainActivity.class));
-        btnJoinGame.setOnClickListener(v->redirect(WaitMultiplayer.class));
+        btnHomeCreateMulti.setOnClickListener(v->redirect(MainActivity.class));
+        btnJoinGame.setOnClickListener(v->redirect2(WaitMultiplayer.class));
     }
     private void createGame(){
         String timeLimit = edtTimeLimit.getText().toString();
+        String rounds = edtRounds.getText().toString();
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        formattedTime = time.format(formatter);
         RequestBody requestBody = new FormBody.Builder()
                 .add("timelimit", timeLimit)
                 .add("creatorid", creatorID)
+                .add("rounds",rounds)
+                .add("starttime", formattedTime)
                 .build();
         Request request = new Request.Builder()
                 .url(hlMultiplayerGames_POST)
@@ -69,6 +77,7 @@ public class CreateMultiplayer extends AppCompatActivity {
                 }
                 else {
                     gameIDGetter();
+                    System.out.println(hlMultiplayerGames_POST);
                 }
             }
         });
@@ -115,7 +124,7 @@ public class CreateMultiplayer extends AppCompatActivity {
         });
     }
 
-    public void redirect(Class<?> nextLocation){
+    public void redirect2(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
         //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
         System.out.println("Testing GAME ID: " + gameID);
@@ -124,7 +133,7 @@ public class CreateMultiplayer extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void redirect2(Class<?> nextLocation){
+    public void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
     }
@@ -133,5 +142,6 @@ public class CreateMultiplayer extends AppCompatActivity {
         edtTimeLimit = findViewById(R.id.edtTimeLimit);
         btnHomeCreateMulti = findViewById(R.id.btnHomeCreateMulti);
         btnJoinGame = findViewById(R.id.btnJoinGame);
+        edtRounds = findViewById(R.id.edtRounds);
     }
 }

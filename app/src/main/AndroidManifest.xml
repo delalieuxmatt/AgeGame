@@ -41,6 +41,11 @@
             android:name=".imagesPlayed"
             android:exported="false" />
         <activity
+            android:name=".hlGame"
+            android:exported="false"
+            android:enableOnBackInvokedCallback="true"
+            tools:targetApi="tiramisu" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

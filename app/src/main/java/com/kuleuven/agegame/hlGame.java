@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,6 +46,7 @@ public class hlGame extends AppCompatActivity {
     private int agefirst, imageIDfirst;
     private int agesecond, imageIDsecond;
     private String imageURLfirst, imageURLsecond;
+    private TextView txtAge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +59,6 @@ public class hlGame extends AppCompatActivity {
         userID = userInfo.getID();
         createGame();
         getGameID();
-    }
-
-    private void initView() {
-        imgknown = findViewById(R.id.imagefirst);
-        imgunknown = findViewById(R.id.imagesecond);
-        buttonOlder = findViewById(R.id.buttonOlder);
-        buttonYounger = findViewById(R.id.buttonYounger);
-        btnHome = findViewById(R.id.btnHome);
-
-        buttonOlder.setOnClickListener(v -> handleGuess(true));
-        buttonYounger.setOnClickListener(v -> handleGuess(false));
-        btnHome.setOnClickListener(v->redirect(MainActivity.class));
     }
 
     private void createGame() {
@@ -165,17 +156,21 @@ public class hlGame extends AppCompatActivity {
             imageURLfirst = jsonObject.optString("image").replace("\\/", "/");
             agefirst = jsonObject.optInt("age");
 
-            runOnUiThread(() -> Glide.with(hlGame.this)
-                    .load(imageURLfirst)
-                    .into(imgknown));
+            runOnUiThread(() -> {
+                txtAge.setText(String.valueOf(agefirst));
+                Glide.with(hlGame.this)
+                        .load(imageURLfirst)
+                        .into(imgknown);
 
-            // Load the second image after the first one is displayed
-            loadSecondImage();
+                // Load the second image after the first one is displayed
+                loadSecondImage();
+            });
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
 
     private void loadSecondImage() {
         Request request = new Request.Builder()
@@ -186,13 +181,13 @@ public class hlGame extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                System.out.println(imgDB);
+                Log.e("loadSecondImage", "Failed to load second image: " + imgDB);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    System.out.println("Unsuccessful image request");
+                    Log.e("loadSecondImage", "Unsuccessful image request");
                 } else {
                     String responseData = response.body().string();
                     parseSecondImage(responseData);
@@ -209,19 +204,23 @@ public class hlGame extends AppCompatActivity {
             imageURLsecond = jsonObject.optString("image").replace("\\/", "/");
             agesecond = jsonObject.optInt("age");
 
-            runOnUiThread(() -> Glide.with(hlGame.this)
-                    .load(imageURLsecond)
-                    .into(imgunknown));
+            runOnUiThread(() -> {
+                Glide.with(hlGame.this)
+                        .load(imageURLsecond)
+                        .into(imgunknown);
+                Log.d("parseSecondImage", "Second image loaded with age: " + agesecond);
+            });
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+
     private void handleGuess(boolean guessedOlder) {
         boolean correctGuess = (guessedOlder && agesecond >= agefirst) || (!guessedOlder && agesecond <= agefirst);
         if (correctGuess) {
-            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Correct!" + agesecond, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Wrong! The correct answer was " + agesecond, Toast.LENGTH_SHORT).show();
         }
@@ -239,6 +238,9 @@ public class hlGame extends AppCompatActivity {
         agefirst = agesecond;
 
         // Display the known image
+        Log.d("parseFirstImage", "Setting age: " + agefirst);
+        txtAge.setText(String.valueOf(agefirst));
+
         Glide.with(hlGame.this)
                 .load(imageURLfirst)
                 .into(imgknown);
@@ -248,11 +250,10 @@ public class hlGame extends AppCompatActivity {
     }
 
     private void recordGuess(boolean correctGuess) {
-        int diff = agesecond - agefirst;
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
-                .add("imageid1", String.valueOf(imageIDfirst))
-                .add("imageid2", String.valueOf(imageIDsecond))
+                .add("imageidone", String.valueOf(imageIDfirst))
+                .add("imageidtwo", String.valueOf(imageIDsecond))
                 .add("correct", String.valueOf(correctGuess))
                 .build();
         Request request = new Request.Builder()
@@ -280,5 +281,18 @@ public class hlGame extends AppCompatActivity {
     public void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
+    }
+
+    private void initView() {
+        imgknown = findViewById(R.id.imagefirst);
+        imgunknown = findViewById(R.id.imagesecond);
+        buttonOlder = findViewById(R.id.buttonOlder);
+        buttonYounger = findViewById(R.id.buttonYounger);
+        btnHome = findViewById(R.id.btnHome);
+        txtAge = findViewById(R.id.txtAge);
+
+        buttonOlder.setOnClickListener(v -> handleGuess(true));
+        buttonYounger.setOnClickListener(v -> handleGuess(false));
+        btnHome.setOnClickListener(v->redirect(MainActivity.class));
     }
 }
