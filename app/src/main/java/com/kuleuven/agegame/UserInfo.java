@@ -1,8 +1,15 @@
 package com.kuleuven.agegame;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.Glide;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,8 +30,6 @@ import okhttp3.Response;
 
 public class UserInfo {
     public String db = "https://studev.groept.be/api/a23pt312/getUserID";
-
-    String responseData;
     /*
     this class contain several methods to write, read or initialize user ID.
      */

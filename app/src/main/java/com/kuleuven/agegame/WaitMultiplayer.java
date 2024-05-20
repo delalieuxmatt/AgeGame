@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,16 +34,15 @@ import okhttp3.Response;
 public class WaitMultiplayer extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private OkHttpClient client;
-
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private String gameID, creator, status, userID, rounds, timeLimit;
+    private int imageIDFirst, imageIDSecond;
+    private String gameID, creator, status, userID, rounds, timeLimit, imageID;
     private Button btnStartGame, btnJoin;
     private LocalTime startTime;
     private ImageButton btnHomeWaitMulti;
     private EditText edtGameID;
     public boolean isCreator = false, isFirst = true;
     private String getStatus = "https://studev.groept.be/api/a23pt312/getMultiGameStatus";
-
+    private final String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
     private final String setStatus = "https://studev.groept.be/api/a23pt312/setMultiGameStatus/";
     private UserInfo userInfo;
     protected void onCreate(Bundle savedInstanceState){
@@ -56,14 +57,11 @@ public class WaitMultiplayer extends AppCompatActivity {
         //Is the creator, isCreator is set as true
         //We get the gameID from the extras and hide the UI components that are
         //not necessary, retrieve the creator's user ID
-        System.out.println(extras);
         if (extras != null) {
             isCreator = true;
             hide();
             gameID = extras.getString("gameID");
             creator = extras.getString("creator");
-            System.out.println("Creator is: " + creator);
-            System.out.println("Game ID is: " + gameID);
             String msg = "The gameID is: " + gameID + ". Inform your friends! Once you are ready, press start game ";
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         }
@@ -108,17 +106,15 @@ public class WaitMultiplayer extends AppCompatActivity {
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                     status = jsonObject.optString("started");
                     String dbTime = jsonObject.optString("startTime");
-                    startTime = LocalTime.parse(dbTime, formatter);
                     rounds = jsonObject.optString("rounds");
                     timeLimit = jsonObject.optString("timeLimit");
                     if(status.equals("1")){
                         Intent intent = new Intent(WaitMultiplayer.this, hlMultiGame.class);
                         //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
-                        System.out.println("Testing GAME ID: " + gameID);
                         intent.putExtra("gameID",gameID);
                         intent.putExtra("rounds", rounds);
                         intent.putExtra("timeLimit", timeLimit);
-                        intent.putExtra("startTime", startTime);
+                        intent.putExtra("startTime", dbTime);
                         intent.putExtra("creator", creator);
                         startActivity(intent);
                     } else {
@@ -133,8 +129,6 @@ public class WaitMultiplayer extends AppCompatActivity {
                     }
 
                     // Now you have the gameID, you can use it as needed
-                    System.out.println("The game status is (0/not started, 1/started: " + status);
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                     System.out.println("Error parsing JSON response.");
@@ -143,12 +137,57 @@ public class WaitMultiplayer extends AppCompatActivity {
         });
     }
 
+
+
     public void startGame(){
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
                 .add("started", "1")
                 .build();
         userInfo.enqPost(setStatus, requestBody);
+        generateRound();
+        joinRoutine();
+    }
+
+    public void generateRound(){
+        String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful on " + url);
+                } else {
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseData);
+                        JSONObject jsonObject = jsonArray.getJSONObject(0);
+                        imageIDFirst = jsonObject.optInt("imageID");
+                        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
+                        imageIDSecond = jsonObject2.optInt("imageID");
+                        System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
+                        RequestBody requestBody = new FormBody.Builder()
+                                .add("gameid", gameID)
+                                .add("imageidone", String.valueOf(imageIDFirst))
+                                .add("imageidtwo", String.valueOf(imageIDSecond))
+                                .build();
+                        userInfo.enqPost(hlMultiplayerRound, requestBody);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public void hide(){

@@ -47,7 +47,7 @@ public class CreateMultiplayer extends AppCompatActivity {
         client = new OkHttpClient();
         btnCreateGame.setOnClickListener(v->createGame());
         btnHomeCreateMulti.setOnClickListener(v->redirect(MainActivity.class));
-        btnJoinGame.setOnClickListener(v->redirect2(WaitMultiplayer.class));
+        btnJoinGame.setOnClickListener(v->gameIDGetter(WaitMultiplayer.class));
     }
     private void createGame(){
         timeLimit = edtTimeLimit.getText().toString();
@@ -70,7 +70,7 @@ public class CreateMultiplayer extends AppCompatActivity {
 
 
 
-    private void gameIDGetter(){
+    private void gameIDGetter(Class<?> nextLocation){
         RequestBody requestBody = new FormBody.Builder()
                 .add("creatorid", creatorID)
                 .build();
@@ -93,9 +93,15 @@ public class CreateMultiplayer extends AppCompatActivity {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                     gameID = jsonObject.optString("gameID");
-
-                    // Now you have the gameID, you can use it as needed
-                    System.out.println("gameID: " + gameID);
+                    Intent intent = new Intent(CreateMultiplayer.this, nextLocation);
+                    //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
+                    System.out.println("Testing GAME ID: " + gameID);
+                    intent.putExtra("gameID",gameID);
+                    intent.putExtra("creator", creatorID);
+                    intent.putExtra("rounds", rounds);
+                    intent.putExtra("timeLimit", timeLimit);
+                    intent.putExtra("startTime", startTime);
+                    startActivity(intent);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -105,17 +111,7 @@ public class CreateMultiplayer extends AppCompatActivity {
         });
     }
 
-    public void redirect2(Class<?> nextLocation){
-        Intent intent = new Intent(this, nextLocation);
-        //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
-        System.out.println("Testing GAME ID: " + gameID);
-        intent.putExtra("gameID",gameID);
-        intent.putExtra("creator", creatorID);
-        intent.putExtra("rounds", rounds);
-        intent.putExtra("timeLimit", timeLimit);
-        intent.putExtra("startTime", startTime);
-        startActivity(intent);
-    }
+
 
     public void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);

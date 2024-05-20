@@ -67,6 +67,7 @@ public class hlMultiGame extends AppCompatActivity {
         rounds = extras.getString("rounds");
         timeLimit = extras.getString("timeLimit");
         String time = extras.getString("startTime");
+        System.out.println(time);
         creator = extras.getString("creator");
         startTime = LocalTime.parse(time, formatter);
         if(userID.equals(creator)){
@@ -236,35 +237,14 @@ public class hlMultiGame extends AppCompatActivity {
                 //.add("imageidtwo", String.valueOf(imageIDsecond))
                 .add("correct", String.valueOf(correctGuess))
                 .build();
-        Request request = new Request.Builder()
-                .url(guessPOST)
-                .post(requestBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(guessPOST);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    System.out.println("Unsuccessful guess submission");
-                } else {
-                    System.out.println("Guess submitted: " + response.body().string());
-                    //System.out.println("Image IDs were:" + imageIDfirst + " " +  imageIDsecond);
-                }
-            }
-        });
+        userInfo.enqPost(guessPOST, requestBody);
     }
     private void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
     }
 
-    private void generateFirstRound(){
+    private void generateRound(){
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
                 .add("imageidone", String.valueOf(imageIDfirst))
