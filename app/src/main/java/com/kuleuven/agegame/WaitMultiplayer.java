@@ -145,50 +145,11 @@ public class WaitMultiplayer extends AppCompatActivity {
                 .add("started", "1")
                 .build();
         userInfo.enqPost(setStatus, requestBody);
-        generateRound();
+        System.out.println("GENERATING FIRST ROUND");
+        userInfo.generateRound(gameID);
         joinRoutine();
     }
 
-    public void generateRound(){
-        String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(url);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String responseData = response.body().string();
-                if (!response.isSuccessful()) {
-                    System.out.println("Unsuccessful on " + url);
-                } else {
-                    try {
-                        JSONArray jsonArray = new JSONArray(responseData);
-                        JSONObject jsonObject = jsonArray.getJSONObject(0);
-                        imageIDFirst = jsonObject.optInt("imageID");
-                        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
-                        imageIDSecond = jsonObject2.optInt("imageID");
-                        System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
-                        RequestBody requestBody = new FormBody.Builder()
-                                .add("gameid", gameID)
-                                .add("imageidone", String.valueOf(imageIDFirst))
-                                .add("imageidtwo", String.valueOf(imageIDSecond))
-                                .build();
-                        userInfo.enqPost(hlMultiplayerRound, requestBody);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
 
     public void hide(){
         edtGameID.setVisibility(View.INVISIBLE);

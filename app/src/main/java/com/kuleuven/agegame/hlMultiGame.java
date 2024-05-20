@@ -37,15 +37,13 @@ import okhttp3.Response;
 public class hlMultiGame extends AppCompatActivity {
 
     OkHttpClient client;
-    private Button buttonYounger, buttonOlder;
+    private Button buttonYounger, buttonOlder, btnStartRound;
     private ImageView imgknown, imgunknown;
     private ImageButton btnHome;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    private String imgDB = "https://studev.groept.be/api/a23pt312/randomImage";
-    private String guessPOST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
-    private String hlMulti_Post = "https://studev.groept.be/api/a23pt312/hlMultiplayerGames_POST";
-    private String hlMultiplayerRound;
+    private final String twoImgDB = "https://studev.groept.be/api/a23pt312/twoRandomImagesInfo";
+    private final String guessPOST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
     private String gameID, userID, imageURLfirst, imageURLsecond, rounds, timeLimit, creator;
     private int agefirst, imageIDfirst, agesecond, imageIDsecond;
     private TextView txtAge;
@@ -56,12 +54,13 @@ public class hlMultiGame extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.hl_game);
+        setContentView(R.layout.hl_multi_game);
         initView();
         client = new OkHttpClient();
+
         userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
-        System.out.println("userID is: " + userID);
+
         Bundle extras = getIntent().getExtras();
         gameID = extras.getString("gameID");
         rounds = extras.getString("rounds");
@@ -70,127 +69,19 @@ public class hlMultiGame extends AppCompatActivity {
         System.out.println(time);
         creator = extras.getString("creator");
         startTime = LocalTime.parse(time, formatter);
-        if(userID.equals(creator)){
-            createGame();
-            //the idea is that it works very similar to the way hlGame works, the creator simply generates
-            //each round, whilst the rest leaches off what is created
-        } else {
-            joinGame();
-        }
 
-        System.out.println(gameID);
+        //This will use the round created by the WaitMultiplayer class
         loadInitialImages();
     }
 
-    private void createGame() {
-        RequestBody requestBody = new FormBody.Builder()
-                .add("userid", userID)
-                .build();
-        userInfo.enqPost(hlMulti_Post, requestBody);
-    }
-
-    private void joinGame(){
-        //This should retrieve the latest entry in the rounds table and dispaly it within the stuff :)
-    }
 
 
     private void loadInitialImages() {
         // Load the initial images for the first round
-        loadFirstImage();
+        loadImages();
         if(!participating){
             buttonOlder.setVisibility(View.INVISIBLE);
             buttonYounger.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    private void loadFirstImage() {
-        Request request = new Request.Builder()
-                .url(imgDB)
-                .get()
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(imgDB);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    System.out.println("Unsuccessful image request");
-                } else {
-                    String responseData = response.body().string();
-                    parseFirstImage(responseData);
-                }
-            }
-        });
-    }
-
-    private void parseFirstImage(String responseData) {
-        try {
-            JSONArray jsonArray = new JSONArray(responseData);
-            JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDfirst = jsonObject.optInt("imageID");
-            imageURLfirst = jsonObject.optString("image").replace("\\/", "/");
-            agefirst = jsonObject.optInt("age");
-
-            runOnUiThread(() -> {
-                txtAge.setText(String.valueOf(agefirst));
-                Glide.with(hlMultiGame.this)
-                        .load(imageURLfirst)
-                        .into(imgknown);
-
-                // Load the second image after the first one is displayed
-                loadSecondImage();
-            });
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadSecondImage() {
-        Request request = new Request.Builder()
-                .url(imgDB)
-                .get()
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                Log.e("loadSecondImage", "Failed to load second image: " + imgDB);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e("loadSecondImage", "Unsuccessful image request");
-                } else {
-                    String responseData = response.body().string();
-                    parseSecondImage(responseData);
-                }
-            }
-        });
-    }
-
-    private void parseSecondImage(String responseData) {
-        try {
-            JSONArray jsonArray = new JSONArray(responseData);
-            JSONObject jsonObject = jsonArray.getJSONObject(0);
-            imageIDsecond = jsonObject.optInt("imageID");
-            imageURLsecond = jsonObject.optString("image").replace("\\/", "/");
-            agesecond = jsonObject.optInt("age");
-
-            runOnUiThread(() -> {
-                Glide.with(hlMultiGame.this)
-                        .load(imageURLsecond)
-                        .into(imgunknown);
-                Log.d("parseSecondImage", "Second image loaded with age: " + agesecond);
-            });
-
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
@@ -202,55 +93,167 @@ public class hlMultiGame extends AppCompatActivity {
             Toast.makeText(this, "Wrong! The correct answer was " + agesecond, Toast.LENGTH_SHORT).show();
             participating = false;
         }
-
         recordGuess(correctGuess);
+        buttonOlder.setVisibility(View.INVISIBLE);
+        buttonYounger.setVisibility(View.INVISIBLE);
+        //At the end of the round, we check if the current user is the one who created the
+        //round, if so, they will generate the next round
+        //This method will also trigger the start of the next round after a short delay
+        if(userID.equals(creator)){
+            generateRound(gameID);
+        }
 
-        // Start the next round after a short delay
-        new Handler(Looper.getMainLooper()).postDelayed(this::startNextRound, 2000);
     }
 
-    private void startNextRound() {
-        // Set the second image of the current round as the first image of the next round
-        System.out.println("Image IDs were:" + imageIDfirst + " " +  imageIDsecond);
-        imageIDfirst = imageIDsecond;
-        imageURLfirst = imageURLsecond;
-        agefirst = agesecond;
-
-        // Display the known image
-        Log.d("parseFirstImage", "Setting age: " + agefirst);
-        txtAge.setText(String.valueOf(agefirst));
-
-        Glide.with(hlMultiGame.this)
-                .load(imageURLfirst)
-                .into(imgknown);
-
-        // Load a new second image
-        loadSecondImage();
-    }
 
     private void recordGuess(boolean correctGuess) {
         System.out.println("Apparently null:" + userID);
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
                 .add("userid", userID)
-                //.add("imageidone", String.valueOf(imageIDfirst))
-                //.add("imageidtwo", String.valueOf(imageIDsecond))
                 .add("correct", String.valueOf(correctGuess))
                 .build();
+        System.out.println("THIS IS CAUSING IT!" + requestBody);
         userInfo.enqPost(guessPOST, requestBody);
     }
+
+
+
+    private void loadImages() {
+        RequestBody requestBody = new FormBody.Builder()
+                .add("gameid", gameID)
+                .build();
+        Request request = new Request.Builder()
+                .url(twoImgDB)
+                .post(requestBody)
+                .build();
+        System.out.println(twoImgDB);
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                Log.e("loadSecondImage", "Failed to load second image: " + twoImgDB);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e("loadSecondImage", "Unsuccessful image request");
+                } else {
+                    String responseData = response.body().string();
+                    parseImages(responseData);
+                }
+            }
+        });
+    }
+
+    //called when page loads
+    private void parseImages(String responseData) {
+        try {
+            JSONArray jsonArray = new JSONArray(responseData);
+            JSONObject jsonObject = jsonArray.getJSONObject(0);
+            imageIDfirst = jsonObject.optInt("imageID1");
+            imageURLfirst = jsonObject.optString("image1").replace("\\/", "/");
+            agefirst = jsonObject.optInt("age1");
+            imageIDsecond = jsonObject.optInt("imageID2");
+            imageURLsecond = jsonObject.optString("image2").replace("\\/", "/");
+            agesecond = jsonObject.optInt("age2");
+
+
+            runOnUiThread(() -> {
+                txtAge.setText(String.valueOf(agefirst));
+                Glide.with(hlMultiGame.this)
+                        .load(imageURLfirst)
+                        .into(imgknown);
+                Glide.with(hlMultiGame.this)
+                        .load(imageURLsecond)
+                        .into(imgunknown);
+                Log.d("parseFirstImage", "First image loaded with age: " + agefirst);
+                Log.d("parseSecondImage", "Second image loaded with age: " + agesecond);
+
+                if(participating){
+                    buttonOlder.setVisibility(View.VISIBLE);
+                    buttonYounger.setVisibility(View.VISIBLE);
+                }
+            });
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void generateRound(String ID){
+        String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
+        String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful on " + url);
+                } else {
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseData);
+                        JSONObject jsonObject = jsonArray.getJSONObject(0);
+                        int imageIDFirst = jsonObject.optInt("imageID");
+                        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
+                        int imageIDSecond = jsonObject2.optInt("imageID");
+                        System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
+                        //Now we add the round to the rounds table!
+                        RequestBody requestBody = new FormBody.Builder()
+                                .add("gameid", ID)
+                                .add("imageidone", String.valueOf(imageIDFirst))
+                                .add("imageidtwo", String.valueOf(imageIDSecond))
+                                .build();
+                        enqueuePost(hlMultiplayerRound, requestBody);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public void enqueuePost(String url, RequestBody rb){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(rb)
+                .build();
+        System.out.println("NO IT IS THIS");
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful on " + url);
+                } else {
+                    System.out.println("Success on " + url +  " with response: " + response.body().string());
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> loadImages(), 2000);
+                }
+            }
+        });
+    }
+
     private void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
-    }
-
-    private void generateRound(){
-        RequestBody requestBody = new FormBody.Builder()
-                .add("gameid", gameID)
-                .add("imageidone", String.valueOf(imageIDfirst))
-                .add("imageidtwo", String.valueOf(imageIDsecond))
-                .build();
-        userInfo.enqPost(hlMultiplayerRound, requestBody);
     }
 
     private void initView() {
@@ -260,9 +263,13 @@ public class hlMultiGame extends AppCompatActivity {
         buttonYounger = findViewById(R.id.buttonYounger);
         btnHome = findViewById(R.id.btnHome);
         txtAge = findViewById(R.id.txtAge);
+        btnStartRound = findViewById(R.id.btnStartRound);
 
         buttonOlder.setOnClickListener(v -> handleGuess(true));
         buttonYounger.setOnClickListener(v -> handleGuess(false));
         btnHome.setOnClickListener(v->redirect(MainActivity.class));
     }
+
+
+
 }

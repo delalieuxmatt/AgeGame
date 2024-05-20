@@ -36,6 +36,7 @@ public class UserInfo {
 
     private Context context;
     private File file;
+    private String responseData;
 
     public UserInfo(Context context){
         this.context = context;
@@ -145,6 +146,53 @@ public class UserInfo {
             }
         });
     }
+
+
+    public void generateRound(String ID){
+        String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
+        String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        System.out.println("The requestBody is as follows:" + request);
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
+                System.out.println("The response data is as follows: " + responseData);
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful on " + url);
+                } else {
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseData);
+                        JSONObject jsonObject = jsonArray.getJSONObject(0);
+                        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
+                        int imageIDFirst = jsonObject.optInt("imageID");
+                        int imageIDSecond = jsonObject2.optInt("imageID");
+                        System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
+                        //Now we add the round to the rounds table!
+                        RequestBody requestBody = new FormBody.Builder()
+                                .add("gameid", ID)
+                                .add("imageidone", String.valueOf(imageIDFirst))
+                                .add("imageidtwo", String.valueOf(imageIDSecond))
+                                .build();
+                        enqPost(hlMultiplayerRound, requestBody);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
 
 }
 
