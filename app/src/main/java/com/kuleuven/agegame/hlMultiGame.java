@@ -69,7 +69,7 @@ public class hlMultiGame extends AppCompatActivity {
         System.out.println(time);
         creator = extras.getString("creator");
         startTime = LocalTime.parse(time, formatter);
-
+        if(!userID.equals(creator)){btnStartRound.setVisibility(View.INVISIBLE);}
         //This will use the round created by the WaitMultiplayer class
         loadInitialImages();
     }
@@ -99,9 +99,6 @@ public class hlMultiGame extends AppCompatActivity {
         //At the end of the round, we check if the current user is the one who created the
         //round, if so, they will generate the next round
         //This method will also trigger the start of the next round after a short delay
-        if(userID.equals(creator)){
-            generateRound(gameID);
-        }
 
     }
 
@@ -113,7 +110,6 @@ public class hlMultiGame extends AppCompatActivity {
                 .add("userid", userID)
                 .add("correct", String.valueOf(correctGuess))
                 .build();
-        System.out.println("THIS IS CAUSING IT!" + requestBody);
         userInfo.enqPost(guessPOST, requestBody);
     }
 
@@ -182,7 +178,7 @@ public class hlMultiGame extends AppCompatActivity {
         }
     }
 
-    public void generateRound(String ID){
+    public void generateRound(){
         String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
         String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
         OkHttpClient client = new OkHttpClient();
@@ -212,7 +208,7 @@ public class hlMultiGame extends AppCompatActivity {
                         System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
                         //Now we add the round to the rounds table!
                         RequestBody requestBody = new FormBody.Builder()
-                                .add("gameid", ID)
+                                .add("gameid", gameID)
                                 .add("imageidone", String.valueOf(imageIDFirst))
                                 .add("imageidtwo", String.valueOf(imageIDSecond))
                                 .build();
@@ -231,7 +227,12 @@ public class hlMultiGame extends AppCompatActivity {
                 .url(url)
                 .post(rb)
                 .build();
-        System.out.println("NO IT IS THIS");
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(hlMultiGame.this, "New round being loaded", Toast.LENGTH_SHORT).show();
+            }
+        });
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -246,6 +247,8 @@ public class hlMultiGame extends AppCompatActivity {
                 } else {
                     System.out.println("Success on " + url +  " with response: " + response.body().string());
                     new Handler(Looper.getMainLooper()).postDelayed(() -> loadImages(), 2000);
+
+
                 }
             }
         });
@@ -268,6 +271,7 @@ public class hlMultiGame extends AppCompatActivity {
         buttonOlder.setOnClickListener(v -> handleGuess(true));
         buttonYounger.setOnClickListener(v -> handleGuess(false));
         btnHome.setOnClickListener(v->redirect(MainActivity.class));
+        btnStartRound.setOnClickListener(v->generateRound());
     }
 
 
