@@ -301,6 +301,10 @@ public class hlMultiGame extends AppCompatActivity {
     }
 
     private void redirect(Class<?> nextLocation){
+        if (scheduledFuture != null && !scheduledFuture.isDone()) {
+            Log.d("roundStarter", "Cancelling scheduled future");
+            scheduledFuture.cancel(true);
+        }
         shutdownScheduler();
         Intent intent = new Intent(this, nextLocation);
         intent.putExtra("gameID",gameID);

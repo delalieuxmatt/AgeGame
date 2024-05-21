@@ -34,10 +34,8 @@ import okhttp3.Response;
 public class WaitMultiplayer extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private OkHttpClient client;
-    private int imageIDFirst, imageIDSecond;
     private String gameID, creator, status, userID, rounds, timeLimit, imageID;
     private Button btnStartGame, btnJoin;
-    private LocalTime startTime;
     private ImageButton btnHomeWaitMulti;
     private EditText edtGameID;
     public boolean isCreator = false, isFirst = true;
@@ -45,6 +43,7 @@ public class WaitMultiplayer extends AppCompatActivity {
     private final String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
     private final String setStatus = "https://studev.groept.be/api/a23pt312/setMultiGameStatus/";
     private UserInfo userInfo;
+    private boolean hasStarted = false;
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_waiting);
@@ -108,7 +107,7 @@ public class WaitMultiplayer extends AppCompatActivity {
                     String dbTime = jsonObject.optString("startTime");
                     rounds = jsonObject.optString("rounds");
                     timeLimit = jsonObject.optString("timeLimit");
-                    if(status.equals("1")){
+                    if(status.equals("1") || hasStarted){
                         Intent intent = new Intent(WaitMultiplayer.this, hlMultiGame.class);
                         //Here we make sure that if you are the one that created the game, that the gameID gets transferred over!
                         intent.putExtra("gameID",gameID);
@@ -144,6 +143,7 @@ public class WaitMultiplayer extends AppCompatActivity {
                 .add("gameid", gameID)
                 .add("started", "1")
                 .build();
+        hasStarted = true;
         userInfo.enqPost(setStatus, requestBody);
         System.out.println("GENERATING FIRST ROUND");
         userInfo.generateRound(gameID);
