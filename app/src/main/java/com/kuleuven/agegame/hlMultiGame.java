@@ -25,6 +25,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -40,7 +44,6 @@ public class hlMultiGame extends AppCompatActivity {
     private Button buttonYounger, buttonOlder, btnStartRound;
     private ImageView imgknown, imgunknown;
     private ImageButton btnHome;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final String twoImgDB = "https://studev.groept.be/api/a23pt312/twoRandomImagesInfo";
     private final String guessPOST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
@@ -48,10 +51,12 @@ public class hlMultiGame extends AppCompatActivity {
     private int agefirst, imageIDfirst, agesecond, imageIDsecond;
     private int roundsCtr = 0;
     private TextView txtAge, txtPersonIs;
-    private LocalTime startTime;
     private boolean participating = true;
     private UserInfo userInfo;
-    private int prevImageID;
+
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> scheduledFuture;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +72,7 @@ public class hlMultiGame extends AppCompatActivity {
         gameID = extras.getString("gameID");
         rounds = extras.getString("rounds");
         timeLimit = extras.getString("timeLimit");
-        String time = extras.getString("startTime");
-        System.out.println(time);
         creator = extras.getString("creator");
-        startTime = LocalTime.parse(time, formatter);
         if(!userID.equals(creator)){btnStartRound.setVisibility(View.INVISIBLE);}
         //This will use the round created by the WaitMultiplayer class
         loadInitialImages();
@@ -143,6 +145,20 @@ public class hlMultiGame extends AppCompatActivity {
                 } else {
                     String responseData = response.body().string();
                     parseImages(responseData);
+                    roundsCtr++;
+
+                    if (scheduledFuture != null && !scheduledFuture.isDone()) {
+                        scheduledFuture.cancel(true);
+                    }
+                    scheduledFuture = scheduler.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (userID.equals(creator)) {
+                                System.out.println("Running" + rounds);
+                                roundStarter();
+                            }
+                        }
+                    }, Long.parseLong(timeLimit), TimeUnit.SECONDS);
                 }
             }
         });
@@ -151,7 +167,6 @@ public class hlMultiGame extends AppCompatActivity {
     //called when page loads
     private void parseImages(String responseData) {
         try {
-            roundsCtr++;
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
             imageIDfirst = jsonObject.optInt("imageID1");
@@ -261,22 +276,41 @@ public class hlMultiGame extends AppCompatActivity {
         });
     }
 
-    public void roundStarter(){
-        if(roundsCtr < Integer.parseInt(rounds)){
-            generateRound();
-        }
-        else{
-            Toast.makeText(this, "The game is over, connecting you to the results page!", Toast.LENGTH_SHORT).show();
-            btnStartRound.setVisibility(View.INVISIBLE);
-            redirect(ResultsMultiplayer.class);
-        }
+    public void roundStarter() {
         System.out.println("Currently on round " + roundsCtr + "/" + rounds);
+        if(roundsCtr < Integer.parseInt(rounds)) {
+            generateRound();
+        } else {
+            // Shutdown the scheduler on a background thread
+            new Handler(Looper.getMainLooper()).post(() -> {
+                shutdownScheduler();
+                System.out.println("Shutting down");
+
+                // Make sure to show the toast and redirect on the main UI thread
+                Toast.makeText(this, "The game is over, connecting you to the results page!", Toast.LENGTH_SHORT).show();
+                btnStartRound.setVisibility(View.INVISIBLE);
+                redirect(ResultsMultiplayer.class);
+            });
+        }
+        //Ensure now that the method from the timer is called
+        //after the game is already over!
+        if (scheduledFuture != null && !scheduledFuture.isDone()) {
+            Log.d("roundStarter", "Cancelling scheduled future");
+            scheduledFuture.cancel(true);
+        }
     }
 
     private void redirect(Class<?> nextLocation){
+        shutdownScheduler();
         Intent intent = new Intent(this, nextLocation);
         intent.putExtra("gameID",gameID);
         startActivity(intent);
+    }
+
+    public void shutdownScheduler() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
     }
 
     private void initView() {
