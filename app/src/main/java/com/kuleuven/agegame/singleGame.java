@@ -43,7 +43,7 @@ public class singleGame extends AppCompatActivity {
     private int roundsWon;
     private String imageURL;
     private int age, imageID;
-    private String imgDB = "https://studev.groept.be/api/a23pt312/randomImage";
+    private String imgDB = "https://studev.groept.be/api/a23pt312/newRandomImage";
     private String standardGame_POST = "https://studev.groept.be/api/a23pt312/standardGame_POST";
     private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getGameID";
     private String correctMsg = "Well done, you got the age correct! You have won: " ;
@@ -57,17 +57,19 @@ public class singleGame extends AppCompatActivity {
         setContentView(R.layout.single_game);
         initView();
         client = new OkHttpClient();
-        imageGetter();
+
+        //imageGetter();
 
         //Initiate the game!!!
         userInfo = new UserInfo(getApplicationContext());
         userID = userInfo.getID();
+        gameIDGetter();
         RequestBody requestBody = new FormBody.Builder()
                 .add("userid",userID)
                 .build();
         userInfo.enqPost(standardGame_POST, requestBody);
         //We now look for the game id of the game we have just created so it can be used throughout the code
-        gameIDGetter();
+        btnGuess.setVisibility(View.INVISIBLE);
 
         btnGuess.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,9 +151,12 @@ public class singleGame extends AppCompatActivity {
     }
 
     private void imageGetter(){
+        RequestBody requestBody = new FormBody.Builder()
+                .add("gameid", gameID)
+                .build();
         Request request = new Request.Builder()
                 .url(imgDB)
-                .get()
+                .post(requestBody)
                 .build();
         //Here we already switch the button to the guessing phase instead of starting a new round
         //The else will be executed next
@@ -178,6 +183,7 @@ public class singleGame extends AppCompatActivity {
                         public void run() {
                             Glide.with(singleGame.this)
                                     .load(imageURL)
+                                    .override(700, 700) // specify the width and height
                                     .into(imgPerson);
                             System.out.println(imageURL);
                         }
@@ -222,10 +228,16 @@ public class singleGame extends AppCompatActivity {
                     JSONArray jsonArray = new JSONArray(responseData);
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                     gameID = jsonObject.optString("gameID");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnGuess.setVisibility(View.VISIBLE);
+                        }
+                    });
                     // Now you have the gameID, you can use it as needed
                     // For example, you can pass it to another method or store it in a variable
                     System.out.println("gameID: " + gameID);
-
+                    imageGetter();
                 } catch (JSONException e) {
                     // Handle JSON parsing error
                     e.printStackTrace();

@@ -46,10 +46,12 @@ public class hlMultiGame extends AppCompatActivity {
     private final String guessPOST = "https://studev.groept.be/api/a23pt312/hlMultiplayerGuess_POST";
     private String gameID, userID, imageURLfirst, imageURLsecond, rounds, timeLimit, creator;
     private int agefirst, imageIDfirst, agesecond, imageIDsecond;
-    private TextView txtAge;
+    private int roundsCtr = 0;
+    private TextView txtAge, txtPersonIs;
     private LocalTime startTime;
     private boolean participating = true;
     private UserInfo userInfo;
+    private int prevImageID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +107,8 @@ public class hlMultiGame extends AppCompatActivity {
 
     private void recordGuess(boolean correctGuess) {
         System.out.println("Apparently null:" + userID);
+        String newmsg = agesecond + " years old";
+        txtPersonIs.setText(newmsg);
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
                 .add("userid", userID)
@@ -116,6 +120,7 @@ public class hlMultiGame extends AppCompatActivity {
 
 
     private void loadImages() {
+        txtPersonIs.setText("This person is: ");
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
                 .build();
@@ -146,6 +151,7 @@ public class hlMultiGame extends AppCompatActivity {
     //called when page loads
     private void parseImages(String responseData) {
         try {
+            roundsCtr++;
             JSONArray jsonArray = new JSONArray(responseData);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
             imageIDfirst = jsonObject.optInt("imageID1");
@@ -179,7 +185,7 @@ public class hlMultiGame extends AppCompatActivity {
     }
 
     public void generateRound(){
-        String url = "https://studev.groept.be/api/a23pt312/twoRandomImages";
+        String url = "https://studev.groept.be/api/a23pt312/newRandomImage";
         String hlMultiplayerRound = "https://studev.groept.be/api/a23pt312/hlMultiplayerRound_POST";
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -202,9 +208,10 @@ public class hlMultiGame extends AppCompatActivity {
                     try {
                         JSONArray jsonArray = new JSONArray(responseData);
                         JSONObject jsonObject = jsonArray.getJSONObject(0);
-                        int imageIDFirst = jsonObject.optInt("imageID");
-                        JSONObject jsonObject2 = jsonArray.getJSONObject(1);
-                        int imageIDSecond = jsonObject2.optInt("imageID");
+                        int imageIDFirst = imageIDsecond;
+                        int imageIDSecond = jsonObject.optInt("imageID");
+                        //JSONObject jsonObject2 = jsonArray.getJSONObject(1);
+                        //int imageIDSecond = jsonObject2.optInt("imageID");
                         System.out.println(imageIDFirst + " testing image IDs! " + imageIDSecond);
                         //Now we add the round to the rounds table!
                         RequestBody requestBody = new FormBody.Builder()
@@ -254,8 +261,21 @@ public class hlMultiGame extends AppCompatActivity {
         });
     }
 
+    public void roundStarter(){
+        if(roundsCtr < Integer.parseInt(rounds)){
+            generateRound();
+        }
+        else{
+            Toast.makeText(this, "The game is over, connecting you to the results page!", Toast.LENGTH_SHORT).show();
+            btnStartRound.setVisibility(View.INVISIBLE);
+            redirect(ResultsMultiplayer.class);
+        }
+        System.out.println("Currently on round " + roundsCtr + "/" + rounds);
+    }
+
     private void redirect(Class<?> nextLocation){
         Intent intent = new Intent(this, nextLocation);
+        intent.putExtra("gameID",gameID);
         startActivity(intent);
     }
 
@@ -267,11 +287,12 @@ public class hlMultiGame extends AppCompatActivity {
         btnHome = findViewById(R.id.btnHome);
         txtAge = findViewById(R.id.txtAge);
         btnStartRound = findViewById(R.id.btnStartRound);
+        txtPersonIs = findViewById(R.id.txtPersonIs);
 
         buttonOlder.setOnClickListener(v -> handleGuess(true));
         buttonYounger.setOnClickListener(v -> handleGuess(false));
         btnHome.setOnClickListener(v->redirect(MainActivity.class));
-        btnStartRound.setOnClickListener(v->generateRound());
+        btnStartRound.setOnClickListener(v->roundStarter());
     }
 
 

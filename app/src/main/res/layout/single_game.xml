@@ -9,7 +9,7 @@
         android:id="@+id/btnGuess"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="220dp"
+        android:layout_marginBottom="112dp"
         android:text="@string/guess"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,12 +26,14 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.212"
         tools:srcCompat="@tools:sample/avatars" />
 
     <EditText
         android:id="@+id/textGuess"
         android:layout_width="208dp"
         android:layout_height="56dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="Enter your guess"
         android:inputType="text"
@@ -56,11 +58,11 @@
         android:id="@+id/btnNewGame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="124dp"
+        android:layout_marginBottom="40dp"
         android:text="@string/Start_new_game"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
