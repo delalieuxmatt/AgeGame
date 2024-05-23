@@ -26,8 +26,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ResultsMultiplayer extends AppCompatActivity {
-    private TextView txtFirst, txtSecond, txtThird;
-    private String gameID, first, second, third;
+    private TextView txtFirst, txtSecond, txtThird, scoreFirst, scoreSecond, scoreThird;
+    private String gameID, first, second, third, score1, score2, score3;
     private String placements = "https://studev.groept.be/api/a23pt312/hlMultiplayerStatistics";
     private OkHttpClient client;
     private ImageButton btnHome;
@@ -47,6 +47,9 @@ public class ResultsMultiplayer extends AppCompatActivity {
         txtSecond = findViewById(R.id.txtSecond);
         txtThird = findViewById(R.id.txtThird);
         btnHome = findViewById(R.id.btnHome);
+        scoreFirst = findViewById(R.id.scoreFirst);
+        scoreSecond = findViewById(R.id.scoreSecond);
+        scoreThird = findViewById(R.id.scoreThird);
 
         btnHome.setOnClickListener(v->redirect(MainActivity.class));
     }
@@ -58,6 +61,7 @@ public class ResultsMultiplayer extends AppCompatActivity {
 
     private void getPlacements(){
         RequestBody requestBody = new FormBody.Builder()
+                .add("gameid", gameID)
                 .add("gameid", gameID)
                 .build();
         Request request = new Request.Builder()
@@ -80,14 +84,21 @@ public class ResultsMultiplayer extends AppCompatActivity {
                         JSONArray jsonArray = new JSONArray(responseData);
                         JSONObject jsonObject = jsonArray.getJSONObject(0);
                         first = jsonObject.optString("FullName");
-                        jsonObject = jsonArray.getJSONObject(1);
-                        second = jsonObject.optString("FullName");
-                        jsonObject = jsonArray.getJSONObject(2);
-                        third = jsonObject.optString("FullName");
+                        score1 = jsonObject.optString("correct_count");
+                        if(jsonArray.length() > 1){
+                            jsonObject = jsonArray.getJSONObject(1);
+                            second = jsonObject.optString("FullName");
+                            score2 = jsonObject.optString("correct_count");
+                        }
+                        if(jsonArray.length()>2){
+                            jsonObject = jsonArray.getJSONObject(2);
+                            third = jsonObject.optString("FullName");
+                            score3 = jsonObject.optString("correct_count");
+                        }
                         runOnUiThread(() -> {
-                            if(first!=null){txtFirst.setText(first);}
-                            if(second!=null){txtFirst.setText(second);}
-                            if(third!=null){txtFirst.setText(third);}
+                            if(first!=null){txtFirst.setText(first); scoreFirst.setText(score1);}
+                            if(second!=null){txtSecond.setText(second); scoreSecond.setText(score2);}
+                            if(third!=null){txtThird.setText(third); scoreThird.setText(score3);}
                         });
 
                     } catch(JSONException e) {

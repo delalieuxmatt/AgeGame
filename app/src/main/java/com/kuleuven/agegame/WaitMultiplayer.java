@@ -32,7 +32,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class WaitMultiplayer extends AppCompatActivity {
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    //private final Handler handler = new Handler(Looper.getMainLooper());
     private OkHttpClient client;
     private String gameID, creator, status, userID, rounds, timeLimit, imageID;
     private Button btnStartGame, btnJoin;
@@ -44,6 +44,10 @@ public class WaitMultiplayer extends AppCompatActivity {
     private final String setStatus = "https://studev.groept.be/api/a23pt312/setMultiGameStatus/";
     private UserInfo userInfo;
     private boolean hasStarted = false;
+    private int firstTime = 0;
+    private Handler handler = new Handler();
+    private Runnable joinRoutineRunnable;
+
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_waiting);
@@ -78,6 +82,16 @@ public class WaitMultiplayer extends AppCompatActivity {
     public void joinRoutine(){
         if(!isCreator){
             gameID = edtGameID.getText().toString();
+            System.out.println(gameID);
+        }
+        if(firstTime==0){
+            String url = "https://studev.groept.be/api/a23pt312/addPlayerHLMulti";
+            RequestBody requestBody = new FormBody.Builder()
+                    .add("gameid", gameID)
+                    .add("userid", userID)
+                    .build();
+            userInfo.enqPost(url, requestBody);
+            firstTime++;
         }
         if(!isFirst){
             String msg = "The game has not started yet, we will check again in 5s";
@@ -119,12 +133,13 @@ public class WaitMultiplayer extends AppCompatActivity {
                     } else {
                         isFirst = false;
                         // Schedule the next check after 5 seconds
-                        handler.postDelayed(new Runnable() {
+                        joinRoutineRunnable = new Runnable() {
                             @Override
                             public void run() {
                                 joinRoutine();
                             }
-                        }, 5000);
+                        };
+                        handler.postDelayed(joinRoutineRunnable, 5000);
                     }
 
                     // Now you have the gameID, you can use it as needed
@@ -156,6 +171,7 @@ public class WaitMultiplayer extends AppCompatActivity {
         btnJoin.setVisibility(View.INVISIBLE);
     }
     public void redirect(Class<?> nextLocation){
+        handler.removeCallbacks(joinRoutineRunnable);
         Intent intent = new Intent(this, nextLocation);
         startActivity(intent);
     }

@@ -29,12 +29,13 @@ import okhttp3.Response;
 public class ProfileActivity extends AppCompatActivity {
 
     Button btnProfileHome, btnProfileLogout, btnStats;
-    TextView txtFirstName, txtLastName, txtEmail, singlePlayed, singleAccuracy, hlPlayed;
+    TextView txtFirstName, txtLastName, txtEmail, singlePlayed, singleAccuracy, hlPlayed, hlAccuracy;
     OkHttpClient client;
     String userID;
-    int sgamesPlayed, stotalDifference, hlGamesPlayed, hltotalDifference;
+    int sgamesPlayed, stotalDifference, hlGamesPlayed, hlWrong, hlRight;
 
-    String dbURL = "https://studev.groept.be/api/a23pt312/standardStatsTotalUserID";
+    String sStats = "https://studev.groept.be/api/a23pt312/standardStatsTotalUserID";
+    String hlStats = "https://studev.groept.be/api/a23pt312/hlStats";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +75,6 @@ public class ProfileActivity extends AppCompatActivity {
         txtFirstName.setText(info[0]);
         txtLastName.setText(info[1]);
         txtEmail.setText(info[2]);
-        singlePlayed.setText(String.valueOf(sgamesPlayed));
-        int acc = sgamesPlayed + stotalDifference;
-        singleAccuracy.setText(String.valueOf(acc));
         //hlPlayed.setText(String.valueOf(userID)); to check the user ID uncomment for now
 
     }
@@ -90,17 +88,17 @@ public class ProfileActivity extends AppCompatActivity {
     public void singleStats(){
         client = new OkHttpClient();
         RequestBody requestBody = new FormBody.Builder()
-                .add("userID", userID)
+                .add("userid", userID)
                 .build();
         Request request = new Request.Builder()
-                .url(dbURL)
+                .url(sStats)
                 .post(requestBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                System.out.println(dbURL);
+                System.out.println(sStats);
             }
 
             @Override
@@ -112,6 +110,50 @@ public class ProfileActivity extends AppCompatActivity {
                     sgamesPlayed = jsonObject.optInt("gamesPlayed");
                     stotalDifference = jsonObject.optInt("totalDifference");
                     System.out.println(sgamesPlayed + " games");
+                    runOnUiThread(() -> {
+                        singlePlayed.setText(sgamesPlayed + " played");
+                        singleAccuracy.setText(stotalDifference + "diff");
+                    });
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                if (!response.isSuccessful()) {
+                    System.out.println("Unsuccessful");
+                }
+            }
+        });
+    }
+
+    public void hlStatsGetter(){
+        client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid", userID)
+                .build();
+        Request request = new Request.Builder()
+                .url(hlStats)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(hlStats);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = response.body().string();
+                try {
+                    JSONArray jsonArray = new JSONArray(responseData);
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+
+                    hlRight = jsonObject.optInt("truecount");
+                    hlWrong = jsonObject.optInt("wrongcount");
+                    System.out.println(sgamesPlayed + " games");
+                    runOnUiThread(() -> {
+                        hlPlayed.setText(hlRight + hlWrong + " played");
+                        hlAccuracy.setText(hlRight/(hlRight+hlWrong) + "%");
+                    });
                 } catch(JSONException e) {
                     e.printStackTrace();
                 }
@@ -130,6 +172,7 @@ public class ProfileActivity extends AppCompatActivity {
         singlePlayed = findViewById(R.id.singlePlayed);
         singleAccuracy = findViewById(R.id.singleAccuracy);
         hlPlayed = findViewById(R.id.hlPlayed);
+        hlAccuracy = findViewById(R.id.hlAccuracy);
         btnStats = findViewById(R.id.btnStats);
 
     }

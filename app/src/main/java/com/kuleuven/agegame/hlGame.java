@@ -220,7 +220,7 @@ public class hlGame extends AppCompatActivity {
     private void handleGuess(boolean guessedOlder) {
         boolean correctGuess = (guessedOlder && agesecond >= agefirst) || (!guessedOlder && agesecond <= agefirst);
         if (correctGuess) {
-            Toast.makeText(this, "Correct!" + agesecond, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Wrong! The correct answer was " + agesecond, Toast.LENGTH_SHORT).show();
         }

@@ -92,7 +92,7 @@ public class hlMultiGame extends AppCompatActivity {
     private void handleGuess(boolean guessedOlder) {
         boolean correctGuess = (guessedOlder && agesecond >= agefirst) || (!guessedOlder && agesecond <= agefirst);
         if (correctGuess) {
-            Toast.makeText(this, "Correct!" + agesecond, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Wrong! The correct answer was " + agesecond, Toast.LENGTH_SHORT).show();
             participating = false;
@@ -122,6 +122,9 @@ public class hlMultiGame extends AppCompatActivity {
 
 
     private void loadImages() {
+        if((roundsCtr+1) == Integer.parseInt(rounds)){
+            btnStartRound.setText("Reveal results");
+        }
         txtPersonIs.setText("This person is: ");
         RequestBody requestBody = new FormBody.Builder()
                 .add("gameid", gameID)
@@ -153,10 +156,8 @@ public class hlMultiGame extends AppCompatActivity {
                     scheduledFuture = scheduler.schedule(new Runnable() {
                         @Override
                         public void run() {
-                            if (userID.equals(creator)) {
-                                System.out.println("Running" + rounds);
-                                roundStarter();
-                            }
+                            System.out.println("Running" + rounds);
+                            roundStarter();
                         }
                     }, Long.parseLong(timeLimit), TimeUnit.SECONDS);
                 }
@@ -279,7 +280,9 @@ public class hlMultiGame extends AppCompatActivity {
     public void roundStarter() {
         System.out.println("Currently on round " + roundsCtr + "/" + rounds);
         if(roundsCtr < Integer.parseInt(rounds)) {
-            generateRound();
+            if(userID.equals(creator)){generateRound();}
+            else{new Handler(Looper.getMainLooper()).postDelayed(this::loadImages, 2000);}
+
         } else {
             // Shutdown the scheduler on a background thread
             new Handler(Looper.getMainLooper()).post(() -> {
