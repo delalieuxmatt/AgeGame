@@ -45,6 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
         userID = info[3];
         initView();
         singleStats();
+        hlStatsGetter();
         initProfile();
         btnProfileHome.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,7 +113,7 @@ public class ProfileActivity extends AppCompatActivity {
                     System.out.println(sgamesPlayed + " games");
                     runOnUiThread(() -> {
                         singlePlayed.setText(sgamesPlayed + " played");
-                        singleAccuracy.setText(stotalDifference + "diff");
+                        singleAccuracy.setText("Off by: " + stotalDifference );
                     });
                 } catch(JSONException e) {
                     e.printStackTrace();
@@ -148,11 +149,15 @@ public class ProfileActivity extends AppCompatActivity {
                     JSONObject jsonObject = jsonArray.getJSONObject(0);
 
                     hlRight = jsonObject.optInt("truecount");
-                    hlWrong = jsonObject.optInt("wrongcount");
+                    hlWrong = jsonObject.optInt("falsecount");
                     System.out.println(sgamesPlayed + " games");
                     runOnUiThread(() -> {
+                        System.out.println("hlRight:" + hlRight + " hlWrong: " + hlWrong);
+                        double acc = (double) hlRight /(hlRight+hlWrong) * 100;
+                        acc = Math.round(acc * 100.0) / 100.0;
+                        System.out.println(acc +"ACCURACY");
                         hlPlayed.setText(hlRight + hlWrong + " played");
-                        hlAccuracy.setText(hlRight/(hlRight+hlWrong) + "%");
+                        hlAccuracy.setText(acc + "%");
                     });
                 } catch(JSONException e) {
                     e.printStackTrace();
