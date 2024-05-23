@@ -84,16 +84,16 @@ public class ResultsMultiplayer extends AppCompatActivity {
                         JSONArray jsonArray = new JSONArray(responseData);
                         JSONObject jsonObject = jsonArray.getJSONObject(0);
                         first = jsonObject.optString("FullName");
-                        score1 = jsonObject.optString("correct_count");
+                        score1 = "Score: " + jsonObject.optString("correct_count");
                         if(jsonArray.length() > 1){
                             jsonObject = jsonArray.getJSONObject(1);
                             second = jsonObject.optString("FullName");
-                            score2 = jsonObject.optString("correct_count");
+                            score2 = "Score: " + jsonObject.optString("correct_count");
                         }
                         if(jsonArray.length()>2){
                             jsonObject = jsonArray.getJSONObject(2);
                             third = jsonObject.optString("FullName");
-                            score3 = jsonObject.optString("correct_count");
+                            score3 = "Score: " + jsonObject.optString("correct_count");
                         }
                         runOnUiThread(() -> {
                             if(first!=null){txtFirst.setText(first); scoreFirst.setText(score1);}

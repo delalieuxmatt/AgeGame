@@ -63,6 +63,7 @@ public class hlMultiGame extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.hl_multi_game);
         initView();
+        btnHome.setVisibility(View.INVISIBLE);
         client = new OkHttpClient();
 
         userInfo = new UserInfo(getApplicationContext());

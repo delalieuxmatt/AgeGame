@@ -39,7 +39,7 @@ public class AmplifyTestPage extends AppCompatActivity {
     OkHttpClient client;
     String fileName, age;
     String errorMsg = "Please enter a file name and an age";
-    String postURL = "https://studev.groept.be/api/a23pt312/image_POST";
+    String postURL = "https://studev.groept.be/api/a23pt312/images_POST";
     private ActivityResultLauncher<Intent> pickImageLauncher;
 
     @Override
@@ -125,7 +125,7 @@ public class AmplifyTestPage extends AppCompatActivity {
     private void addToDB(String imageURL){
         String age = enterAge.getText().toString();
         if(!age.isEmpty() && !imageURL.isEmpty()){
-            System.out.println("Not empty");
+            System.out.println("Not empty" + age);
             RequestBody requestBody = new FormBody.Builder()
                     .add("url", imageURL)
                     .add("age", age)
@@ -147,6 +147,9 @@ public class AmplifyTestPage extends AppCompatActivity {
                 public void onResponse(@NonNull Call call, @NonNull Response response) {
                     if (!response.isSuccessful()) {
                         System.out.println("Unsuccessful");
+                    }
+                    else{
+                        Toast.makeText(AmplifyTestPage.this, "Images has been uploaded!", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

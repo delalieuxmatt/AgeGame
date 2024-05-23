@@ -38,7 +38,7 @@ public class hlGame extends AppCompatActivity {
     private Button buttonYounger, buttonOlder;
     private ImageView imgknown, imgunknown;
     private ImageButton btnHome;
-    private String imgDB = "https://studev.groept.be/api/a23pt312/randomImage";
+    private String imgDB = "https://studev.groept.be/api/a23pt312/hlImages";
     private String guessPOST = "https://studev.groept.be/api/a23pt312/hlGuess_POST";
     private String hlgamePost = "https://studev.groept.be/api/a23pt312/hlGame_POST";
     private String gameIDGetter = "https://studev.groept.be/api/a23pt312/getGameID";
@@ -125,9 +125,13 @@ public class hlGame extends AppCompatActivity {
     }
 
     private void loadFirstImage() {
+        RequestBody requestBody = new FormBody.Builder()
+                .add("gameid", gameID)
+                .add("gameid", gameID)
+                .build();
         Request request = new Request.Builder()
                 .url(imgDB)
-                .get()
+                .post(requestBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
